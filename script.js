@@ -36,5 +36,45 @@ function addTicker() {
     updateWatchlistUI();
 }
 
+let chartInstance = null;
+
+// Affiche le graphique pour un ticker
+async function viewChart(ticker) {
+    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?range=1mo&interval=1d`;
+    try {
+        const res = await fetch(PROXY + encodeURIComponent(url));
+        const data = await res.json();
+        const result = data.chart.result[0];
+        const timestamps = result.timestamp;
+        const closes = result.indicators.quote[0].close;
+        const labels = timestamps.map(ts => new Date(ts*1000).toLocaleDateString());
+
+        const ctx = document.getElementById('chart').getContext('2d');
+        if(chartInstance) chartInstance.destroy();
+        chartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: ticker,
+                    data: closes,
+                    borderColor: 'green',
+                    backgroundColor: 'transparent',
+                    tension: 0.25,
+                    pointRadius: 0
+                }]
+            },
+            options: {
+                plugins: { legend: { position: 'bottom' } },
+                scales: { x: { display: true }, y: { display: true } }
+            }
+        });
+    } catch(e) {
+        console.warn('Erreur graphique', e);
+        alert('Impossible de charger le graphique pour ' + ticker);
+    }
+}
+
+
 // Initialisation
 updateWatchlistUI();
