@@ -2,8 +2,10 @@ const PROXY = 'https://api.allorigins.win/raw?url=';
 const API_QUOTE = ticker => `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(ticker)}`;
 
 let state = {
-    watchlist: ['AAPL','TSLA','NVDA']
+    watchlist: ['AAPL','TSLA','NVDA'],
+    alerts: []  // ici on stocke toutes les alertes
 };
+
 
 let chartInstance = null;
 
