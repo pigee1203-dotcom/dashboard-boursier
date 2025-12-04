@@ -46,5 +46,18 @@
     </section>
 
     <script src="script.js"></script>
-</body>
+</body><section id="alerts-section">
+    <h2>🔔 Alertes de prix</h2>
+    <div id="alerts"></div>
+    <div id="add-alert">
+        <input id="alert-ticker" type="text" placeholder="Ticker (ex : TSLA)">
+        <input id="alert-price" type="number" placeholder="Prix (ex : 210)">
+        <select id="alert-direction">
+            <option value="above">Au-dessus</option>
+            <option value="below">En-dessous</option>
+        </select>
+        <button onclick="addAlert()">Créer alerte</button>
+    </div>
+</section>
+
 </html>
