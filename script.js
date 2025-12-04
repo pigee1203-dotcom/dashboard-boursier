@@ -15,23 +15,33 @@ async function updateWatchlistUI() {
     const cont = document.getElementById('watchlist');
     cont.innerHTML = '';
     for (const t of state.watchlist) {
-        let price = '--';
+        let price = null;
         try {
             const res = await fetch(PROXY + encodeURIComponent(API_QUOTE(t)));
             const data = await res.json();
             const quote = data.quoteResponse.result[0];
-            if (quote && quote.regularMarketPrice != null) price = quote.regularMarketPrice.toFixed(2) + ' €';
+            if (quote && quote.regularMarketPrice != null) price = quote.regularMarketPrice;
         } catch(e) {
             console.warn('Erreur fetch price', e);
         }
 
+        const prevPrice = document.getElementById(`price-${t}`)?.dataset.value;
         const div = document.createElement('div');
         div.className = 'ticker';
-        div.innerHTML = `${t}: ${price} 
+
+        // Comparaison prix précédent
+        let color = 'black';
+        if(prevPrice && price) {
+            if(price > parseFloat(prevPrice)) color = 'green';
+            else if(price < parseFloat(prevPrice)) color = 'red';
+        }
+
+        div.innerHTML = `${t}: <span id="price-${t}" data-value="${price}" style="color:${color}">${price != null ? price.toFixed(2)+' €' : '--'}</span> 
             <button onclick="viewChart('${t}')">Voir</button>`;
         cont.appendChild(div);
     }
 }
+
 
 // Ajouter un ticker
 function addTicker() {
