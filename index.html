@@ -2,10 +2,15 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard Boursier</title>
+    <title>Mon Dashboard Boursier</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <h1>Dashboard Boursier</h1>
-    <p>Test simple : ça fonctionne !</p>
+    <h1>Mon Dashboard Boursier</h1>
+    <div id="dashboard">
+        <p>Prix des actions : <span id="prix">--</span> €</p>
+        <button onclick="updatePrice()">Mettre à jour</button>
+    </div>
+    <script src="script.js"></script>
 </body>
 </html>
