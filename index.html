@@ -9,41 +9,49 @@
 <body>
     <h1>Dashboard Boursier</h1>
 
-    <!-- Ajouter un ticker -->
-    <div>
-        <input type="text" id="new-ticker" placeholder="Ajouter un ticker">
-        <button onclick="addTicker()">Ajouter</button>
+    <!-- Section Ajouter un ticker -->
+    <div class="section">
+        <h2>Ajouter un ticker</h2>
+        <input type="text" placeholder="Ticker" id="new-ticker">
+        <button>Ajouter</button>
     </div>
 
-    <!-- Watchlist -->
-    <div id="watchlist"></div>
-
-    <!-- Graphique -->
-    <canvas id="chart" width="600" height="400"></canvas>
-
-    <!-- Prix actuel -->
-    <div>
-        Prix actuel : <span id="prix">--</span> €
+    <!-- Section Watchlist -->
+    <div class="section">
+        <h2>Watchlist</h2>
+        <div id="watchlist">
+            <!-- Les tickers apparaîtront ici -->
+        </div>
     </div>
 
-    <!-- Alertes -->
-    <div>
-        <input type="text" id="alert-ticker" placeholder="Ticker">
-        <input type="number" id="alert-price" placeholder="Prix">
+    <!-- Section Graphique -->
+    <div class="section">
+        <h2>Graphique</h2>
+        <canvas id="chart" width="600" height="400"></canvas>
+    </div>
+
+    <!-- Section Alertes -->
+    <div class="section">
+        <h2>Alertes</h2>
+        <input type="text" placeholder="Ticker" id="alert-ticker">
+        <input type="number" placeholder="Prix" id="alert-price">
         <select id="alert-direction">
             <option value="above">Au-dessus</option>
             <option value="below">En-dessous</option>
         </select>
-        <button onclick="addAlert()">Créer alerte</button>
+        <button>Créer alerte</button>
+        <div id="alerts">
+            <!-- Les alertes apparaîtront ici -->
+        </div>
     </div>
-    <div id="alerts"></div>
 
-    <!-- Notifications -->
-    <div id="notify"></div>
+    <!-- Section News -->
+    <div class="section">
+        <h2>News</h2>
+        <div id="news">
+            <!-- Les news apparaîtront ici -->
+        </div>
+    </div>
 
-    <!-- News -->
-    <div id="news"></div>
-
-    <script src="script.js"></script>
 </body>
 </html>
