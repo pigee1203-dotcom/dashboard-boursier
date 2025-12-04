@@ -1,0 +1,17 @@
+index.html
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Mon Dashboard Boursier</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>Mon Dashboard Boursier</h1>
+    <div id="dashboard">
+        <p>Prix des actions : <span id="prix">--</span> €</p>
+        <button onclick="updatePrice()">Mettre à jour</button>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
