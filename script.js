@@ -168,6 +168,8 @@ function checkAlerts(quotes){
     if(!q || q.price==null) return;
     if(a.direction==='above' && q.price >= a.price) showNotification(`ALERTE: ${a.ticker} au dessus de ${a.price} (actuel ${q.price})`);
     if(a.direction==='below' && q.price <= a.price) showNotification(`ALERTE: ${a.ticker} en dessous de ${a.price} (actuel ${q.price})`);
+    alertSound.play(); // Joue le son
+
   });
 }
 
