@@ -114,32 +114,40 @@ async function viewChart(ticker){
 }
 
 function renderChart(labels, data, ticker){
-  const ctx = document.getElementById('chart').getContext('2d');
-  const ma20 = movingAverage(data, 20);
-  const ma50 = movingAverage(data, 50);
-  // format last values for MA display
-  const lastMA20 = ma20.filter(x=>x!=null).slice(-1)[0] || '—';
-  const lastMA50 = ma50.filter(x=>x!=null).slice(-1)[0] || '—';
-  // show in footer or notification
-  showNotification(`${ticker} • MA20: ${typeof lastMA20==='number'? lastMA20.toFixed(2): '—'} • MA50: ${typeof lastMA50==='number'? lastMA50.toFixed(2): '—'}`, 3500);
+    const ctx = document.getElementById('chart').getContext('2d');
+    const ma20 = movingAverage(data, 20);
+    const ma50 = movingAverage(data, 50);
 
-  if(chartInstance) chartInstance.destroy();
-  chartInstance = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: labels,
-      datasets: [
-        {label: `${ticker} (prix)`, data: data, tension:0.25, pointRadius:0},
-        {label: 'MA20', data: ma20, borderDash:[5,5], tension:0.1, pointRadius:0},
-        {label: 'MA50', data: ma50, borderDash:[2,6], tension:0.1, pointRadius:0}
-      ]
-    },
-    options: {
-      plugins:{legend:{position:'bottom'}},
-      scales:{x:{display:true}, y:{display:true}}
-    }
-  });
+    // Dernière valeur pour couleur du graphique
+    const lastPrice = data[data.length-1];
+    const prevPrice = data[data.length-2] || lastPrice;
+    const lineColor = lastPrice >= prevPrice ? 'green' : 'red';
+
+    if(chartInstance) chartInstance.destroy();
+    chartInstance = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: `${ticker} (prix)`,
+                    data: data,
+                    borderColor: lineColor,
+                    backgroundColor: 'transparent',
+                    tension:0.25,
+                    pointRadius:0
+                },
+                {label: 'MA20', data: ma20, borderDash:[5,5], borderColor:'blue', tension:0.1, pointRadius:0},
+                {label: 'MA50', data: ma50, borderDash:[2,6], borderColor:'orange', tension:0.1, pointRadius:0}
+            ]
+        },
+        options: {
+            plugins:{legend:{position:'bottom'}},
+            scales:{x:{display:true}, y:{display:true}}
+        }
+    });
 }
+
 
 // --- ALERTS ---
 function renderAlerts(){
