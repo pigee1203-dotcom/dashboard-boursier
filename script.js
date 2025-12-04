@@ -67,9 +67,9 @@ async function updateWatchlistUI(){
         const div = document.createElement('div'); div.className='ticker';
         const left = document.createElement('div'); left.className='left';
         left.innerHTML=`<div class="sym">${r.symbol}</div><div class="meta">${r.price!=null?r.price.toLocaleString():'—'}</div>`;
-        const right = document.createElement('div');
+        const right = document.createElement('div'); right.className='right';
         const pct = r.changePct!=null ? r.changePct.toFixed(2)+'%' : '—';
-        right.innerHTML=`<div style="text-align:right">${pct}</div>
+        right.innerHTML=`<div>${pct}</div>
             <div style="margin-top:6px">
             <button onclick="viewChart('${r.symbol}')">Voir</button>
             <button onclick="removeTicker('${r.symbol}')">Suppr</button>
@@ -159,11 +159,6 @@ function addAlert(){
 
 function removeAlert(i){ state.alerts.splice(i,1); saveState(); renderAlerts(); }
 
-async function loadNews(){
-    const el=document.getElementById('news');
-    el.innerHTML='<div class="news-item">Chargement des news...</div>';
-}
-
 async function checkAlerts(quotes){
     state.alerts.forEach(a=>{
         const q = quotes.find(x=>x && x.symbol===a.ticker);
@@ -182,10 +177,8 @@ async function init(){
 
     await updateWatchlistUI();
     renderAlerts();
-    await loadNews();
     setInterval(async()=>{
         await updateWatchlistUI();
-        await loadNews();
     }, AUTO_REFRESH_MS);
 }
 
