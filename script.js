@@ -1,5 +1,5 @@
 const PROXY = 'https://api.allorigins.win/raw?url=';
-const API_QUOTE = (s) => `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(s)}`;
+const API_QUOTE = s => `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(s)}`;
 const API_CHART = (s, range='1mo', interval='1d') => `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(s)}?range=${range}&interval=${interval}`;
 const AUTO_REFRESH_MS = 30000;
 
@@ -65,16 +65,9 @@ async function updateWatchlistUI(){
     for(const r of results){
         if(!r) continue;
         const div = document.createElement('div'); div.className='ticker';
-        const left = document.createElement('div'); left.className='left';
-        left.innerHTML=`<div class="sym">${r.symbol}</div><div class="meta">${r.price!=null?r.price.toLocaleString():'—'}</div>`;
-        const right = document.createElement('div'); right.className='right';
-        const pct = r.changePct!=null ? r.changePct.toFixed(2)+'%' : '—';
-        right.innerHTML=`<div>${pct}</div>
-            <div style="margin-top:6px">
+        div.innerHTML=`${r.symbol}: ${r.price!=null?r.price.toLocaleString():'—'} € (${r.changePct!=null?r.changePct.toFixed(2)+'%':'—'}) 
             <button onclick="viewChart('${r.symbol}')">Voir</button>
-            <button onclick="removeTicker('${r.symbol}')">Suppr</button>
-            </div>`;
-        div.appendChild(left); div.appendChild(right);
+            <button onclick="removeTicker('${r.symbol}')">Suppr</button>`;
         cont.appendChild(div);
     }
     saveState();
@@ -100,34 +93,15 @@ async function viewChart(ticker){
 
 function renderChart(labels, data, ticker){
     const ctx = document.getElementById('chart').getContext('2d');
-    const ma20 = movingAverage(data,20);
-    const ma50 = movingAverage(data,50);
-
-    const lastPrice = data[data.length-1];
-    const prevPrice = data[data.length-2] || lastPrice;
-    const lineColor = lastPrice>=prevPrice?'green':'red';
-
-    const alertPoints = [];
-    state.alerts.forEach(a=>{
-        if(a.ticker===ticker){
-            data.forEach((price,i)=>{
-                if((a.direction==='above' && price>=a.price)||(a.direction==='below' && price<=a.price)){
-                    alertPoints.push({x:labels[i], y:price});
-                }
-            });
-        }
-    });
-
     if(chartInstance) chartInstance.destroy();
     chartInstance = new Chart(ctx,{
         type:'line',
         data:{
             labels:labels,
             datasets:[
-                {label:`${ticker} (prix)`, data:data, borderColor:lineColor, backgroundColor:'transparent', tension:0.25, pointRadius:0},
-                {label:'MA20', data:ma20, borderDash:[5,5], borderColor:'blue', tension:0.1, pointRadius:0},
-                {label:'MA50', data:ma50, borderDash:[2,6], borderColor:'orange', tension:0.1, pointRadius:0},
-                {label:'Alertes', data:alertPoints, type:'scatter', backgroundColor:'red', pointRadius:6}
+                {label:`${ticker} (prix)`, data:data, borderColor:'green', backgroundColor:'transparent', tension:0.25, pointRadius:0},
+                {label:'MA20', data:movingAverage(data,20), borderDash:[5,5], borderColor:'blue', tension:0.1, pointRadius:0},
+                {label:'MA50', data:movingAverage(data,50), borderDash:[2,6], borderColor:'orange', tension:0.1, pointRadius:0}
             ]
         },
         options:{plugins:{legend:{position:'bottom'}}, scales:{x:{display:true},y:{display:true}}}
