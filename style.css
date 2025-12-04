@@ -45,3 +45,38 @@ button {
     width: 90%;
     max-width: 600px;
     padding: 10px;
+    margin-bottom: 5px;
+    border: 1px solid #f00;
+    background-color: #fee;
+    border-radius: 5px;
+}
+
+#chart {
+    margin-top: 30px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    max-width: 90%;
+}
+
+#notify {
+    display: none;
+    background-color: #ffd;
+    padding: 10px;
+    margin: 10px auto;
+    border: 1px solid #ccc;
+    max-width: 600px;
+    border-radius: 5px;
+}
+
+.news-item {
+    width: 90%;
+    max-width: 600px;
+    padding: 10px;
+    background-color: #eef;
+    margin-bottom: 5px;
+    border-radius: 5px;
+    text-align: left;
+}
+
+.left { text-align: left; }
+.right { text-align: right; }
