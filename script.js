@@ -5,7 +5,9 @@ let state = {
     watchlist: ['AAPL','TSLA','NVDA']
 };
 
-// Afficher les tickers et leurs prix
+let chartInstance = null;
+
+// Affiche les tickers avec le prix et bouton "Voir"
 async function updateWatchlistUI() {
     const cont = document.getElementById('watchlist');
     cont.innerHTML = '';
@@ -19,26 +21,16 @@ async function updateWatchlistUI() {
         } catch(e) {
             console.warn('Erreur fetch price', e);
         }
+
         const div = document.createElement('div');
         div.className = 'ticker';
-        div.textContent = `${t}: ${price}`;
+        div.innerHTML = `${t}: ${price} 
+            <button onclick="viewChart('${t}')">Voir</button>`;
         cont.appendChild(div);
     }
 }
 
-// Ajouter un ticker
-function addTicker() {
-    const input = document.getElementById('new-ticker');
-    const t = input.value.trim().toUpperCase();
-    if (!t) return alert('Ticker vide');
-    if (!state.watchlist.includes(t)) state.watchlist.push(t);
-    input.value = '';
-    updateWatchlistUI();
-}
-
-let chartInstance = null;
-
-// Affiche le graphique pour un ticker
+// Affiche le graphique dans le canvas
 async function viewChart(ticker) {
     const url = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?range=1mo&interval=1d`;
     try {
@@ -75,6 +67,15 @@ async function viewChart(ticker) {
     }
 }
 
+// Ajouter un ticker
+function addTicker() {
+    const input = document.getElementById('new-ticker');
+    const t = input.value.trim().toUpperCase();
+    if (!t) return alert('Ticker vide');
+    if (!state.watchlist.includes(t)) state.watchlist.push(t);
+    input.value = '';
+    updateWatchlistUI();
+}
 
 // Initialisation
 updateWatchlistUI();
