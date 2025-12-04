@@ -4,14 +4,13 @@
     <meta charset="UTF-8">
     <title>Mon Dashboard Boursier</title>
     <link rel="stylesheet" href="style.css">
-
 </head>
 <body>
-    <h1>Dashboard Boursier</h1>
-    <p>Prix acctuel : <span id="prix">0</span></p>
+    <h1>Mon Dashboard Boursier</h1>
+    <div id="dashboard">
+        <p>Prix des actions : <span id="prix">--</span> €</p>
         <button onclick="updatePrice()">Mettre à jour</button>
-
+    </div>
     <script src="script.js"></script>
-
 </body>
 </html>
