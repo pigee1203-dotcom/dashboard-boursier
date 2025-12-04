@@ -1,10 +1,11 @@
 const PROXY = 'https://api.allorigins.win/raw?url=';
 const API_QUOTE = ticker => `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(ticker)}`;
-const alertSound = new Audio('beep.mp3');
+
+const alertSound = new Audio('beep.mp3'); // Son pour les alertes
 
 let state = {
     watchlist: ['AAPL','TSLA','NVDA'],
-    alerts: []  // ici on stocke toutes les alertes
+    alerts: []  // stockage des alertes
 };
 
 let chartInstance = null;
@@ -119,15 +120,17 @@ async function checkAlerts() {
             const price = quote?.regularMarketPrice;
             if(!price) continue;
 
-           if(a.direction==='above' && price >= a.price) {
-    alert(`ALERTE: ${a.ticker} est au-dessus de ${a.price} (actuel: ${price})`);
-    alertSound.play();
-}
-if(a.direction==='below' && price <= a.price) {
-    alert(`ALERTE: ${a.ticker} est en-dessous de ${a.price} (actuel: ${price})`);
-    alertSound.play();
-}
-
+            if(a.direction==='above' && price >= a.price) {
+                alert(`ALERTE: ${a.ticker} est au-dessus de ${a.price} (actuel: ${price})`);
+                alertSound.play();
+            }
+            if(a.direction==='below' && price <= a.price) {
+                alert(`ALERTE: ${a.ticker} est en-dessous de ${a.price} (actuel: ${price})`);
+                alertSound.play();
+            }
+        } catch(e) {
+            console.warn('Erreur check alert', e);
+        }
     }
 }
 
