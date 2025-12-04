@@ -1,4 +1,6 @@
 /* script.js - Dashboard Boursier Complet */
+// Création de l’alerte sonore
+const alertSound = new Audio('alert.mp3');
 
 // --- CONFIG ---
 const PROXY = 'https://api.allorigins.win/raw?url='; // proxy pour contourner CORS
