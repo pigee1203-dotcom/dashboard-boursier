@@ -2,15 +2,49 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Mon Dashboard Boursier</title>
+    <title>Dashboard Boursier Complet</title>
     <link rel="stylesheet" href="style.css">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
+
 <body>
-    <h1>Mon Dashboard Boursier</h1>
-    <div id="dashboard">
-        <p>Prix des actions : <span id="prix">--</span> €</p>
-        <button onclick="updatePrice()">Mettre à jour</button>
-    </div>
+    <header>
+        <h1>📊 Dashboard Boursier Complet</h1>
+        <p>Mises à jour en temps réel • Données Yahoo Finance</p>
+    </header>
+
+    <section id="watchlist-section">
+        <h2>📈 Watchlist</h2>
+        <div id="watchlist"></div>
+
+        <div id="add-ticker">
+            <input id="new-ticker" type="text" placeholder="Ajouter un ticker (ex : AAPL)">
+            <button onclick="addTicker()">Ajouter</button>
+        </div>
+    </section>
+
+    <section id="chart-section">
+        <h2>📉 Graphique</h2>
+        <canvas id="chart"></canvas>
+    </section>
+
+    <section id="alerts-section">
+        <h2>🔔 Alertes de prix</h2>
+        <div id="alerts"></div>
+        <div id="add-alert">
+            <input id="alert-ticker" type="text" placeholder="Ticker (ex : TSLA)">
+            <input id="alert-price" type="number" placeholder="Prix (ex : 210)">
+            <button onclick="addAlert()">Créer alerte</button>
+        </div>
+    </section>
+
+    <section id="news-section">
+        <h2>📰 Actualités Boursières</h2>
+        <div id="news"></div>
+    </section>
+
     <script src="script.js"></script>
 </body>
 </html>
