@@ -118,10 +118,22 @@ function renderChart(labels, data, ticker){
     const ma20 = movingAverage(data, 20);
     const ma50 = movingAverage(data, 50);
 
-    // Dernière valeur pour couleur du graphique
     const lastPrice = data[data.length-1];
     const prevPrice = data[data.length-2] || lastPrice;
     const lineColor = lastPrice >= prevPrice ? 'green' : 'red';
+
+    // Points d’alerte
+    const alertPoints = [];
+    state.alerts.forEach(a => {
+        if(a.ticker === ticker){
+            data.forEach((price, i) => {
+                if((a.direction==='above' && price >= a.price) ||
+                   (a.direction==='below' && price <= a.price)){
+                    alertPoints.push({x: labels[i], y: price});
+                }
+            });
+        }
+    });
 
     if(chartInstance) chartInstance.destroy();
     chartInstance = new Chart(ctx, {
@@ -137,8 +149,19 @@ function renderChart(labels, data, ticker){
                     tension:0.25,
                     pointRadius:0
                 },
-                {label: 'MA20', data: ma20, borderDash:[5,5], borderColor:'blue', tension:0.1, pointRadius:0},
-                {label: 'MA50', data: ma50, borderDash:[2,6], borderColor:'orange', tension:0.1, pointRadius:0}
+                { // Moyennes mobiles
+                    label: 'MA20', data: ma20, borderDash:[5,5], borderColor:'blue', tension:0.1, pointRadius:0
+                },
+                {
+                    label: 'MA50', data: ma50, borderDash:[2,6], borderColor:'orange', tension:0.1, pointRadius:0
+                },
+                { // Points d’alerte
+                    label: 'Alertes',
+                    data: alertPoints,
+                    type: 'scatter',
+                    backgroundColor: 'red',
+                    pointRadius: 6
+                }
             ]
         },
         options: {
@@ -146,6 +169,8 @@ function renderChart(labels, data, ticker){
             scales:{x:{display:true}, y:{display:true}}
         }
     });
+}
+
 }
 
 
