@@ -210,3 +210,61 @@ async function init(){
 }
 
 init();
+// --- ALERTES ---
+let alerts = JSON.parse(localStorage.getItem('alerts')) || [];
+
+function saveAlerts() {
+    localStorage.setItem('alerts', JSON.stringify(alerts));
+}
+
+function renderAlerts() {
+    const el = document.getElementById('alerts');
+    el.innerHTML = '';
+    alerts.forEach((a, i) => {
+        const div = document.createElement('div');
+        div.className = 'alert-item';
+        div.innerHTML = `${a.ticker} ${a.direction==='above' ? '>' : '<'} ${a.price} 
+            <button onclick="removeAlert(${i})">Suppr</button>`;
+        el.appendChild(div);
+    });
+}
+
+function addAlert() {
+    const ticker = document.getElementById('alert-ticker').value.trim().toUpperCase();
+    const price = parseFloat(document.getElementById('alert-price').value);
+    const direction = document.getElementById('alert-direction').value;
+
+    if (!ticker || !price) { alert('Ticker ou prix manquant'); return; }
+
+    alerts.push({ticker, price, direction});
+    saveAlerts();
+    renderAlerts();
+
+    document.getElementById('alert-ticker').value = '';
+    document.getElementById('alert-price').value = '';
+}
+
+function removeAlert(i) {
+    alerts.splice(i,1);
+    saveAlerts();
+    renderAlerts();
+}
+
+// Vérification automatique
+async function checkAlerts() {
+    for (let a of alerts) {
+        const data = await fetch(`https://api.allorigins.win/raw?url=https://query1.finance.yahoo.com/v8/finance/chart/${a.ticker}`)
+            .then(r => r.json());
+        const price = data.chart.result[0].meta.regularMarketPrice;
+        if ((a.direction==='above' && price >= a.price) || (a.direction==='below' && price <= a.price)) {
+            alert(`ALERTE: ${a.ticker} est ${a.direction==='above'?'au-dessus':'en-dessous'} de ${a.price} (actuel: ${price})`);
+        }
+    }
+}
+
+// Auto check toutes les 30 secondes
+setInterval(checkAlerts, 30000);
+
+// Initialisation
+renderAlerts();
+
