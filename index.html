@@ -2,62 +2,46 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <title>Dashboard Boursier Complet</title>
+    <title>Dashboard Boursier</title>
     <link rel="stylesheet" href="style.css">
-
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-
 <body>
-    <header>
-        <h1>📊 Dashboard Boursier Complet</h1>
-        <p>Mises à jour en temps réel • Données Yahoo Finance</p>
-    </header>
+    <h1>Dashboard Boursier</h1>
 
-    <section id="watchlist-section">
-        <h2>📈 Watchlist</h2>
-        <div id="watchlist"></div>
+    <!-- Watchlist -->
+    <div>
+        <input type="text" id="new-ticker" placeholder="Ajouter un ticker">
+        <button onclick="addTicker()">Ajouter</button>
+    </div>
+    <div id="watchlist"></div>
 
-        <div id="add-ticker">
-            <input id="new-ticker" type="text" placeholder="Ajouter un ticker (ex : AAPL)">
-            <button onclick="addTicker()">Ajouter</button>
-        </div>
-    </section>
+    <!-- Graphique -->
+    <canvas id="chart" width="600" height="400"></canvas>
 
-    <section id="chart-section">
-        <h2>📉 Graphique</h2>
-        <canvas id="chart"></canvas>
-    </section>
+    <!-- Prix actuel -->
+    <div>
+        Prix actuel : <span id="prix">--</span> €
+    </div>
 
-    <section id="alerts-section">
-        <h2>🔔 Alertes de prix</h2>
-        <div id="alerts"></div>
-        <div id="add-alert">
-            <input id="alert-ticker" type="text" placeholder="Ticker (ex : TSLA)">
-            <input id="alert-price" type="number" placeholder="Prix (ex : 210)">
-            <button onclick="addAlert()">Créer alerte</button>
-        </div>
-    </section>
-
-    <section id="news-section">
-        <h2>📰 Actualités Boursières</h2>
-        <div id="news"></div>
-    </section>
-
-    <script src="script.js"></script>
-</body><section id="alerts-section">
-    <h2>🔔 Alertes de prix</h2>
-    <div id="alerts"></div>
-    <div id="add-alert">
-        <input id="alert-ticker" type="text" placeholder="Ticker (ex : TSLA)">
-        <input id="alert-price" type="number" placeholder="Prix (ex : 210)">
+    <!-- Alertes -->
+    <div>
+        <input type="text" id="alert-ticker" placeholder="Ticker">
+        <input type="number" id="alert-price" placeholder="Prix">
         <select id="alert-direction">
             <option value="above">Au-dessus</option>
             <option value="below">En-dessous</option>
         </select>
         <button onclick="addAlert()">Créer alerte</button>
     </div>
-</section>
+    <div id="alerts"></div>
 
+    <!-- Notifications -->
+    <div id="notify" style="display:none; background:#ffd; padding:5px; margin:5px 0;"></div>
+
+    <!-- News -->
+    <div id="news"></div>
+
+    <script src="script.js"></script>
+</body>
 </html>
