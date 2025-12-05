@@ -3,54 +3,35 @@
 <head>
 <meta charset="UTF-8">
 <title>Dashboard Boursier</title>
-<link rel="stylesheet" href="style.css">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial/dist/chartjs-chart-financial.min.js"></script>
 <style>
     body { font-family: Arial, sans-serif; padding: 20px; }
+    #chart { width: 100%; max-width: 600px; height: 300px; }
     .section { margin-bottom: 20px; }
-    .ticker, .popular-ticker { margin: 5px 0; display: inline-block; }
-    .popular-ticker { margin-right: 10px; cursor: pointer; background:#eee; padding:3px 6px; border-radius:4px; }
+    .ticker { margin: 5px 0; }
     .alert-item { margin: 3px 0; }
     #mode-switch { margin-top: 20px; }
     .box { border: 1px solid #ccc; padding: 10px; margin: 5px 0; border-radius: 5px; }
     .warning { background-color: #ffe5e5; }
-    #chart { width: 100%; max-width: 600px; height: 300px; }
 </style>
 </head>
 <body>
+
 <h1>Dashboard Boursier</h1>
-
-<!-- Choix devise -->
-<div class="section">
-    <label>Devise : </label>
-    <select id="currency-select">
-        <option value="EUR">EUR</option>
-        <option value="USD">USD</option>
-        <option value="CAD">CAD</option>
-    </select>
-</div>
-
-<!-- Tickers populaires -->
-<div class="section">
-    <h2>Tickers Populaires</h2>
-    <div id="popular-tickers">
-        <span class="popular-ticker" onclick="addTickerDirect('AAPL')">AAPL</span>
-        <span class="popular-ticker" onclick="addTickerDirect('TSLA')">TSLA</span>
-        <span class="popular-ticker" onclick="addTickerDirect('NVDA')">NVDA</span>
-        <span class="popular-ticker" onclick="addTickerDirect('MSFT')">MSFT</span>
-        <span class="popular-ticker" onclick="addTickerDirect('GOOGL')">GOOGL</span>
-        <span class="popular-ticker" onclick="addTickerDirect('AMZN')">AMZN</span>
-        <span class="popular-ticker" onclick="addTickerDirect('META')">META</span>
-    </div>
-</div>
 
 <!-- Ajouter un ticker -->
 <div class="section">
     <h2>Ajouter un ticker</h2>
-    <input type="text" placeholder="Ticker" id="new-ticker" list="tickers-list">
+    <input type="text" id="new-ticker" placeholder="Ticker" list="tickers-list">
     <datalist id="tickers-list">
-        <option value="AAPL"><option value="TSLA"><option value="NVDA"><option value="MSFT"><option value="GOOGL"><option value="AMZN"><option value="META">
+        <option value="AAPL">
+        <option value="TSLA">
+        <option value="NVDA">
+        <option value="MSFT">
+        <option value="GOOGL">
+        <option value="AMZN">
+        <option value="META">
     </datalist>
     <button onclick="addTicker()">Ajouter</button>
 </div>
@@ -64,12 +45,12 @@
 <!-- Graphique -->
 <div class="section">
     <h2>Graphique</h2>
-    <canvas id="chart"></canvas>
+    <canvas id="chart"></canvas><br>
     <button onclick="toggleChartType()">Changer Graphique</button>
 </div>
 
 <!-- Mode Débutant -->
-<div id="mode-debutant" class="section" style="border:1px solid #ccc; border-radius:10px; padding:10px;">
+<div id="mode-debutant" class="section">
     <h2>Mode Débutant</h2>
     <p><strong>Prix actuel :</strong> <span id="prix-debutant">--</span></p>
     <p><strong>RSI simplifié :</strong> <span id="rsi-simplifie">--</span></p>
@@ -80,8 +61,8 @@
 <!-- Alertes -->
 <div class="section">
     <h2>Alertes</h2>
-    <input type="text" placeholder="Ticker" id="alert-ticker">
-    <input type="number" placeholder="Prix" id="alert-price">
+    <input type="text" id="alert-ticker" placeholder="Ticker">
+    <input type="number" id="alert-price" placeholder="Prix">
     <select id="alert-direction">
         <option value="above">Au-dessus</option>
         <option value="below">En-dessous</option>
@@ -91,41 +72,45 @@
 </div>
 
 <!-- Mode débutant / pro -->
-<div id="mode-switch">
+<div id="mode-switch" class="section">
     <button onclick="setMode('debutant')">Débutant</button>
     <button onclick="setMode('pro')">Pro</button>
 </div>
 
-<div id="section-debutant" class="mode-section">
+<div id="section-debutant" class="mode-section section">
     <h2>Vue Débutant</h2>
     <div class="box">
         <h3>Résumé du Marché</h3>
         <p id="resume-marche">Chargement...</p>
     </div>
+    <div class="box">
+        <h3>Prix Actuel</h3>
+        <p id="prix-debutant">Sélectionne une action pour voir le prix.</p>
+    </div>
+    <div class="box">
+        <h3>Indicateur Simple (RSI)</h3>
+        <p id="rsi-simplifie">--</p>
+        <small class="info">RSI : mesure si le titre est “trop acheté” ou “trop vendu”.</small>
+    </div>
+    <div class="box">
+        <h3>Conseil Automatique</h3>
+        <p id="conseil-debutant">Sélectionne une action…</p>
+    </div>
+    <div class="box warning">
+        <h3>Avertissement Risque</h3>
+        <p id="risque-simple">Aucun risque détecté.</p>
+    </div>
 </div>
 
 <script>
-const PROXY = 'https://api.allorigins.win/raw?url=';
-const API_QUOTE = ticker => `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(ticker)}`;
-const alertSound = new Audio('beep.mp3');
-let state = { watchlist:['AAPL','TSLA','NVDA'], alerts:[] };
-let chartInstance = null;
+const PROXY='https://api.allorigins.win/raw?url=';
+const API_QUOTE=ticker=>`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(ticker)}`;
+const alertSound=new Audio('beep.mp3');
+let state={watchlist:['AAPL','TSLA','NVDA'],alerts:[]};
+let chartInstance=null;
 let chartType='line';
 let currentTicker='';
 
-// UTILITAIRE
-function formatPrice(price){
-    const cur = document.getElementById('currency-select').value;
-    if(!price) return '--';
-    switch(cur){
-        case 'USD': return price.toFixed(2)+' $';
-        case 'CAD': return price.toFixed(2)+' $';
-        case 'EUR': return price.toFixed(2)+' €';
-        default: return price.toFixed(2);
-    }
-}
-
-// WATCHLIST
 async function updateWatchlistUI(){
     const cont=document.getElementById('watchlist'); cont.innerHTML='';
     for(const t of state.watchlist){
@@ -135,34 +120,21 @@ async function updateWatchlistUI(){
             const data=await res.json();
             const quote=data.quoteResponse.result[0];
             if(quote && quote.regularMarketPrice!=null) price=quote.regularMarketPrice;
-        }catch(e){ console.warn('Erreur fetch price', e); }
-
+        }catch(e){ console.warn('Erreur fetch price', e);}
         const prevPrice=document.getElementById(`price-${t}`)?.dataset.value;
         const div=document.createElement('div'); div.className='ticker';
         let color='black'; if(prevPrice && price) color=price>parseFloat(prevPrice)?'green':'red';
-        div.innerHTML=`${t}: <span id="price-${t}" data-value="${price}" style="color:${color}">${formatPrice(price)}</span>
-        <button onclick="viewChart('${t}')">Voir</button>`;
+        div.innerHTML=`${t}: <span id="price-${t}" data-value="${price}" style="color:${color}">${price!=null?price.toFixed(2)+' €':'--'}</span> <button onclick="viewChart('${t}')">Voir</button>`;
         cont.appendChild(div);
     }
 }
 
-// AJOUTER TICKER
 function addTicker(){
-    const input=document.getElementById('new-ticker');
-    const t=input.value.trim().toUpperCase();
-    if(!t) return alert('Ticker vide');
-    if(!state.watchlist.includes(t)) state.watchlist.push(t);
-    input.value='';
-    updateWatchlistUI();
+    const input=document.getElementById('new-ticker'); const t=input.value.trim().toUpperCase();
+    if(!t) return alert('Ticker vide'); if(!state.watchlist.includes(t)) state.watchlist.push(t);
+    input.value=''; updateWatchlistUI();
 }
 
-// AJOUTER TICKER PAR BOUTON POPULAIRE
-function addTickerDirect(ticker){
-    if(!state.watchlist.includes(ticker)) state.watchlist.push(ticker);
-    updateWatchlistUI();
-}
-
-// GRAPH
 async function viewChart(ticker){
     currentTicker=ticker;
     try{
@@ -177,103 +149,34 @@ async function viewChart(ticker){
 
         if(chartType==='line'){
             const closes=result.indicators.quote[0].close;
-            chartInstance=new Chart(ctx,{
-                type:'line',
-                data:{labels, datasets:[{label:ticker, data:closes, borderColor:'green', backgroundColor:'transparent', tension:0.25, pointRadius:0}]},
-                options:{plugins:{legend:{position:'bottom'}}, scales:{x:{display:true},y:{display:true}}}
-            });
-            updateDebutantView(ticker, closes[closes.length-1]||0, Math.floor(Math.random()*100));
+            chartInstance=new Chart(ctx,{type:'line',data:{labels:labels,datasets:[{label:ticker,data:closes,borderColor:'green',backgroundColor:'transparent',tension:0.25,pointRadius:0}]},options:{plugins:{legend:{position:'bottom'}},scales:{x:{display:true},y:{display:true}}}});
+            updateDebutantView(ticker,closes[closes.length-1]||0,Math.floor(Math.random()*100));
         } else {
-            const ohlc=result.indicators.quote[0].open.map((o,i)=>({
-                x:labels[i],
-                o:o,
-                h:result.indicators.quote[0].high[i],
-                l:result.indicators.quote[0].low[i],
-                c:result.indicators.quote[0].close[i]
-            }));
-            chartInstance=new Chart(ctx,{
-                type:'candlestick',
-                data:{datasets:[{label:ticker,data:ohlc}]},
-                options:{plugins:{legend:{position:'bottom'}}, scales:{x:{display:true},y:{display:true}}}
-            });
+            const ohlc=result.indicators.quote[0].open.map((o,i)=>({x:labels[i],o:o,h:result.indicators.quote[0].high[i],l:result.indicators.quote[0].low[i],c:result.indicators.quote[0].close[i]}));
+            chartInstance=new Chart(ctx,{type:'candlestick',data:{datasets:[{label:ticker,data:ohlc}]},options:{plugins:{legend:{position:'bottom'}},scales:{x:{display:true},y:{display:true}}}});
         }
-    }catch(e){ console.warn('Erreur graphique', e); alert('Impossible de charger le graphique pour '+ticker);}
+    }catch(e){console.warn('Erreur graphique',e); alert('Impossible de charger le graphique pour '+ticker);}
 }
 
-function toggleChartType(){
-    chartType = chartType==='line'?'candlestick':'line';
-    if(currentTicker) viewChart(currentTicker);
-}
+function toggleChartType(){ chartType=chartType==='line'?'candlestick':'line'; if(currentTicker) viewChart(currentTicker); }
 
-// ALERTES
-function renderAlerts(){
-    const el=document.getElementById('alerts'); el.innerHTML='';
-    state.alerts.forEach((a,i)=>{
-        const div=document.createElement('div'); div.className='alert-item';
-        div.innerHTML=`${a.ticker} ${a.direction==='above'?'>':'<'} ${a.price} <button onclick="removeAlert(${i})">Supprimer</button>`;
-        el.appendChild(div);
-    });
-}
+function renderAlerts(){ const el=document.getElementById('alerts'); el.innerHTML=''; state.alerts.forEach((a,i)=>{ const div=document.createElement('div'); div.className='alert-item'; div.innerHTML=`${a.ticker} ${a.direction==='above'?'>':'<'} ${a.price} <button onclick="removeAlert(${i})">Supprimer</button>`; el.appendChild(div);});}
 
-function addAlert(){
-    const t=document.getElementById('alert-ticker').value.trim().toUpperCase();
-    const p=parseFloat(document.getElementById('alert-price').value);
-    const d=document.getElementById('alert-direction').value;
-    if(!t||!p) return alert('Ticker ou prix manquant');
-    state.alerts.push({ticker:t,price:p,direction:d});
-    document.getElementById('alert-ticker').value='';
-    document.getElementById('alert-price').value='';
-    renderAlerts();
-}
+function addAlert(){ const t=document.getElementById('alert-ticker').value.trim().toUpperCase(); const p=parseFloat(document.getElementById('alert-price').value); const d=document.getElementById('alert-direction').value;
+if(!t||!p) return alert('Ticker ou prix manquant'); state.alerts.push({ticker:t,price:p,direction:d}); document.getElementById('alert-ticker').value=''; document.getElementById('alert-price').value=''; renderAlerts(); }
 
 function removeAlert(i){ state.alerts.splice(i,1); renderAlerts(); }
 
-async function checkAlerts(){
-    for(let a of state.alerts){
-        try{
-            const res=await fetch(PROXY+encodeURIComponent(API_QUOTE(a.ticker)));
-            const data=await res.json();
-            const quote=data.quoteResponse.result[0];
-            const price=quote?.regularMarketPrice;
-            if(!price) continue;
-            if(a.direction==='above' && price>=a.price){ alert(`ALERTE: ${a.ticker} > ${a.price} (actuel: ${price})`); alertSound.play(); }
-            if(a.direction==='below' && price<=a.price){ alert(`ALERTE: ${a.ticker} < ${a.price} (actuel: ${price})`); alertSound.play(); }
-        }catch(e){ console.warn('Erreur check alert', e);}
-    }
-}
+async function checkAlerts(){ for(let a of state.alerts){ try{ const res=await fetch(PROXY+encodeURIComponent(API_QUOTE(a.ticker))); const data=await res.json(); const quote=data.quoteResponse.result[0]; const price=quote?.regularMarketPrice; if(!price) continue; if(a.direction==='above'&&price>=a.price){ alert(`ALERTE: ${a.ticker} est au-dessus de ${a.price} (actuel: ${price})`); alertSound.play(); } if(a.direction==='below'&&price<=a.price){ alert(`ALERTE: ${a.ticker} est en-dessous de ${a.price} (actuel: ${price})`); alertSound.play(); } }catch(e){console.warn('Erreur check alert',e);} } }
 setInterval(checkAlerts,30000);
 
-// MODE DEBUTANT
-function updateDebutantView(ticker, price, rsi){
-    document.getElementById("prix-debutant").textContent=ticker+" : "+formatPrice(price);
-    let rsiText="RSI : "+rsi;
-    if(rsi>70) rsiText+=" (suracheté)";
-    else if(rsi<30) rsiText+=" (survendu)";
-    else rsiText+=" (zone neutre)";
-    document.getElementById("rsi-simplifie").textContent=rsiText;
+function updateDebutantView(ticker,price,rsiValue){ document.getElementById("prix-debutant").textContent=ticker+" : "+price.toFixed(2)+" €";
+let rsiText="RSI : "+rsiValue; if(rsiValue>70) rsiText+=" (suracheté)"; else if(rsiValue<30) rsiText+=" (survendu)"; else rsiText+=" (zone neutre)"; document.getElementById("rsi-simplifie").textContent=rsiText;
+let conseil="Analyse en cours..."; if(rsiValue>70) conseil="Attention : le prix est peut-être trop haut."; if(rsiValue<30) conseil="Peut-être une opportunité pour entrer."; if(rsiValue>=30&&rsiValue<=70) conseil="Marché stable."; document.getElementById("conseil-debutant").textContent=conseil;
+let risque="Aucun danger immédiat."; if(rsiValue>80) risque="⚠ Risque élevé : chute possible."; if(rsiValue<20) risque="⚠ Risque : marché très incertain."; document.getElementById("risque-simple").textContent=risque; }
 
-    let conseil="Analyse en cours...";
-    if(rsi>70) conseil="Attention : le prix est peut-être trop haut.";
-    if(rsi<30) conseil="Peut-être une opportunité pour entrer.";
-    if(rsi>=30 && rsi<=70) conseil="Marché stable.";
-    document.getElementById("conseil-debutant").textContent=conseil;
+function setMode(mode){ document.getElementById('mode-debutant').style.display=mode==='debutant'?'block':'none'; document.getElementById('section-debutant').style.display=mode==='debutant'?'block':'none'; }
 
-    let risque="Aucun danger immédiat.";
-    if(rsi>80) risque="⚠ Risque élevé : chute possible.";
-    if(rsi<20) risque="⚠ Risque : marché très incertain.";
-    document.getElementById("risque-simple").textContent=risque;
-}
-
-// MODE DEBUTANT / PRO
-function setMode(mode){
-    document.getElementById('mode-debutant').style.display=mode==='debutant'?'block':'none';
-    document.getElementById('section-debutant').style.display=mode==='debutant'?'block':'none';
-}
-
-// EVENT DEV
-document.getElementById('currency-select').addEventListener('change', updateWatchlistUI);
-
-// INITIALISATION
 updateWatchlistUI();
 renderAlerts();
 </script>
