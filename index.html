@@ -7,45 +7,59 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <header>
-        <h1>Dashboard Boursier</h1>
-        <div id="mode-switch">
-            <button onclick="setMode('debutant')" id="btn-debutant">Mode Débutant</button>
-            <button onclick="setMode('pro')" id="btn-pro">Mode Pro</button>
-        </div>
-    </header>
+    <h1>Dashboard Boursier</h1>
 
-    <!-- SECTION AJOUTER TICKER -->
-    <section class="section">
+    <!-- Section Ajouter un ticker avec auto-complétion -->
+    <div class="section">
         <h2>Ajouter un ticker</h2>
-        <input type="text" placeholder="Ticker" id="new-ticker">
+        <input type="text" id="new-ticker" placeholder="Ticker" list="tickers-list">
+        <datalist id="tickers-list">
+            <option value="AAPL">
+            <option value="TSLA">
+            <option value="NVDA">
+            <option value="AMZN">
+            <option value="GOOGL">
+            <option value="MSFT">
+        </datalist>
         <button onclick="addTicker()">Ajouter</button>
-    </section>
-<div class="section">
-    <label for="currency-select">Devise :</label>
-    <select id="currency-select">
-        <option value="EUR">€ Euro</option>
-        <option value="CAD" selected>$ CAD</option>
-        <option value="USD">$ USD</option>
-    </select>
-</div>
+    </div>
 
-    <!-- WATCHLIST -->
-    <section class="section">
-        <h2>Watchlist</h2>
-        <div id="watchlist">
-            <!-- Les tickers apparaîtront ici -->
+    <!-- Section Tickers Populaires -->
+    <div class="section">
+        <h2>Tickers Populaires</h2>
+        <div id="popular-tickers">
+            <button onclick="addTickerFromIcon('AAPL')">🍏 AAPL</button>
+            <button onclick="addTickerFromIcon('TSLA')">🚗 TSLA</button>
+            <button onclick="addTickerFromIcon('NVDA')">💻 NVDA</button>
+            <button onclick="addTickerFromIcon('AMZN')">📦 AMZN</button>
+            <button onclick="addTickerFromIcon('GOOGL')">🔍 GOOGL</button>
+            <button onclick="addTickerFromIcon('MSFT')">🪟 MSFT</button>
         </div>
-    </section>
+    </div>
 
-    <!-- GRAPHIQUE -->
-    <section class="section">
+    <!-- Section Watchlist -->
+    <div class="section">
+        <h2>Watchlist</h2>
+        <div id="watchlist"></div>
+    </div>
+
+    <!-- Section Graphique -->
+    <div class="section">
         <h2>Graphique</h2>
         <canvas id="chart" width="600" height="400"></canvas>
-    </section>
+    </div>
 
-    <!-- ALERTES -->
-    <section class="section">
+    <!-- Mode Débutant -->
+    <div id="mode-debutant" class="mode-section" style="margin-top:30px; padding:20px; border:1px solid #ccc; border-radius:10px;">
+        <h2>Mode Débutant (Ultra Simple)</h2>
+        <p><strong>Prix actuel :</strong> <span id="prix-debutant">--</span></p>
+        <p><strong>RSI simplifié :</strong> <span id="rsi-simplifie">--</span></p>
+        <p><strong>Conseil :</strong> <span id="conseil-debutant">--</span></p>
+        <p><strong>Risque :</strong> <span id="risque-simple">--</span></p>
+    </div>
+
+    <!-- Section Alertes -->
+    <div class="section">
         <h2>Alertes</h2>
         <input type="text" placeholder="Ticker" id="alert-ticker">
         <input type="number" placeholder="Prix" id="alert-price">
@@ -55,34 +69,44 @@
         </select>
         <button onclick="addAlert()">Créer alerte</button>
         <div id="alerts"></div>
-    </section>
+    </div>
 
-    <!-- NEWS -->
-    <section class="section">
+    <!-- Section News -->
+    <div class="section">
         <h2>News</h2>
-        <div id="news">Chargement des news...</div>
-    </section>
+        <div id="news"></div>
+    </div>
 
-    <!-- MODE DEBUTANT -->
-    <section id="mode-debutant" class="mode-section">
-        <h2>Mode Débutant</h2>
+    <!-- Switch Mode Débutant / Pro -->
+    <div id="mode-switch">
+        <button onclick="setMode('debutant')">Débutant</button>
+        <button onclick="setMode('pro')">Pro</button>
+    </div>
+
+    <div id="section-debutant" class="mode-section">
+        <h2>Vue Débutant</h2>
         <div class="box">
-            <h3>Prix actuel</h3>
-            <p id="prix-debutant">--</p>
+            <h3>Résumé du Marché</h3>
+            <p id="resume-marche">Chargement...</p>
         </div>
         <div class="box">
-            <h3>RSI simplifié</h3>
+            <h3>Prix Actuel</h3>
+            <p id="prix-debutant">Sélectionne une action pour voir le prix.</p>
+        </div>
+        <div class="box">
+            <h3>Indicateur Simple (RSI)</h3>
             <p id="rsi-simplifie">--</p>
+            <small class="info">RSI : mesure si le titre est “trop acheté” ou “trop vendu”.</small>
         </div>
         <div class="box">
-            <h3>Conseil automatique</h3>
-            <p id="conseil-debutant">--</p>
+            <h3>Conseil Automatique</h3>
+            <p id="conseil-debutant">Sélectionne une action…</p>
         </div>
         <div class="box warning">
-            <h3>Risque</h3>
-            <p id="risque-simple">--</p>
+            <h3>Avertissement Risque</h3>
+            <p id="risque-simple">Aucun risque détecté.</p>
         </div>
-    </section>
+    </div>
 
     <script src="script.js"></script>
 </body>
