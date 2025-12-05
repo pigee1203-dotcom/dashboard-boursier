@@ -5,6 +5,7 @@
     <title>Dashboard Boursier</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js" defer></script>
 </head>
 <body>
     <h1>Dashboard Boursier</h1>
@@ -13,7 +14,7 @@
     <div class="section">
         <h2>Ajouter un ticker</h2>
         <input type="text" placeholder="Ticker" id="new-ticker">
-        <button>Ajouter</button>
+        <button onclick="addTicker()">Ajouter</button>
     </div>
 
     <!-- Section Watchlist -->
@@ -29,15 +30,15 @@
         <h2>Graphique</h2>
         <canvas id="chart" width="600" height="400"></canvas>
     </div>
-<!-- ==== MODE DÉBUTANT ==== -->
-<div id="mode-debutant" style="margin-top:30px; padding:20px; border:1px solid #ccc; border-radius:10px;">
-    <h2>Mode Débutant (Ultra Simple)</h2>
 
-    <p><strong>Prix actuel :</strong> <span id="prix-debutant">--</span></p>
-    <p><strong>RSI simplifié :</strong> <span id="rsi-simplifie">--</span></p>
-    <p><strong>Conseil :</strong> <span id="conseil-debutant">--</span></p>
-    <p><strong>Risque :</strong> <span id="risque-simple">--</span></p>
-</div>
+    <!-- ==== MODE DÉBUTANT ==== -->
+    <div id="mode-debutant" style="margin-top:30px; padding:20px; border:1px solid #ccc; border-radius:10px;">
+        <h2>Mode Débutant (Ultra Simple)</h2>
+        <p><strong>Prix actuel :</strong> <span id="prix-debutant">--</span></p>
+        <p><strong>RSI simplifié :</strong> <span id="rsi-simplifie">--</span></p>
+        <p><strong>Conseil :</strong> <span id="conseil-debutant">--</span></p>
+        <p><strong>Risque :</strong> <span id="risque-simple">--</span></p>
+    </div>
 
     <!-- Section Alertes -->
     <div class="section">
@@ -48,7 +49,8 @@
             <option value="above">Au-dessus</option>
             <option value="below">En-dessous</option>
         </select>
-        <button>Créer alerte</button>
+        <button onclick="addAlert()">Créer alerte</button>
+
         <div id="alerts">
             <!-- Les alertes apparaîtront ici -->
         </div>
@@ -62,41 +64,44 @@
         </div>
     </div>
 
+    <!-- Switch Débutant / Pro -->
+    <div id="mode-switch" style="margin-top:20px;">
+        <button onclick="setMode('debutant')" id="btn-debutant">Débutant</button>
+        <button onclick="setMode('pro')" id="btn-pro">Pro</button>
+    </div>
+
+    <!-- Vue Débutant complète -->
+    <div id="section-debutant" class="mode-section" style="margin-top:20px; padding:20px; border:1px solid #ccc; border-radius:10px;">
+        <h2>Vue Débutant</h2>
+
+        <div class="box">
+            <h3>Résumé du Marché</h3>
+            <p id="resume-marche">Chargement...</p>
+        </div>
+
+        <div class="box">
+            <h3>Prix Actuel</h3>
+            <p id="prix-debutant-detail">Sélectionne une action pour voir le prix.</p>
+        </div>
+
+        <div class="box">
+            <h3>Indicateur Simple (RSI)</h3>
+            <p id="rsi-simplifie-detail">--</p>
+            <small class="info">
+                RSI : mesure si le titre est “trop acheté” ou “trop vendu”.
+            </small>
+        </div>
+
+        <div class="box">
+            <h3>Conseil Automatique</h3>
+            <p id="conseil-debutant-detail">Sélectionne une action…</p>
+        </div>
+
+        <div class="box warning">
+            <h3>Avertissement Risque</h3>
+            <p id="risque-simple-detail">Aucun risque détecté.</p>
+        </div>
+    </div>
+
 </body>
-    <div id="mode-switch">
-    <button onclick="setMode('debutant')" id="btn-debutant">Débutant</button>
-    <button onclick="setMode('pro')" id="btn-pro">Pro</button>
-</div>
-<div id="section-debutant" class="mode-section">
-    <h2>Vue Débutant</h2>
-
-    <div class="box">
-        <h3>Résumé du Marché</h3>
-        <p id="resume-marche">Chargement...</p>
-    </div>
-
-    <div class="box">
-        <h3>Prix Actuel</h3>
-        <p id="prix-debutant">Sélectionne une action pour voir le prix.</p>
-    </div>
-
-    <div class="box">
-        <h3>Indicateur Simple (RSI)</h3>
-        <p id="rsi-simplifie">--</p>
-        <small class="info">
-            RSI : mesure si le titre est “trop acheté” ou “trop vendu”.
-        </small>
-    </div>
-
-    <div class="box">
-        <h3>Conseil Automatique</h3>
-        <p id="conseil-debutant">Sélectionne une action…</p>
-    </div>
-
-    <div class="box warning">
-        <h3>Avertissement Risque</h3>
-        <p id="risque-simple">Aucun risque détecté.</p>
-    </div>
-</div>
-
 </html>
