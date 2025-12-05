@@ -15,7 +15,7 @@ let chartInstance = null;
 // === WATCHLIST ===
 async function updateWatchlistUI() {
     const cont = document.getElementById('watchlist');
-    div.innerHTML = `${t}: <span id="price-${t}" data-value="${price}" style="color:${color}">${price != null ? price.toFixed(2)+' €' : '--'}</span> 
+    div.innerHTML = `${t}: <span id="price-${t}" data-value="${price}" style="color:${color}">${formatPrice(price)}</span> 
     <button onclick="viewChart('${t}')">Voir</button>`;
 
     for (const t of state.watchlist) {
@@ -27,6 +27,13 @@ async function updateWatchlistUI() {
             if (quote && quote.regularMarketPrice != null) price = quote.regularMarketPrice;
         } catch(e) {
             console.warn('Erreur fetch price', e);
+            // --- INITIALISATION ---
+updateWatchlistUI();
+renderAlerts();
+
+// --- ÉVÉNEMENT POUR CHANGER LA DEVISE ---
+document.getElementById('currency-select').addEventListener('change', updateWatchlistUI);
+
         }
 
        function formatPrice(price) {
