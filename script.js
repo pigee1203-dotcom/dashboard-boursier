@@ -27,11 +27,14 @@ async function updateWatchlistUI() {
             console.warn('Erreur fetch price', e);
         }
 
-        const div = document.createElement('div');
-        div.className = 'ticker';
-        div.innerHTML = `${t}: ${price != null ? price.toFixed(2)+' €' : '--'} 
-            <button onclick="viewChart('${t}')">Voir</button>`;
-        cont.appendChild(div);
+       function formatPrice(price) {
+    const currency = document.getElementById('currency-select').value;
+    if (!price) return '--';
+    switch(currency) {
+        case 'CAD': return price.toFixed(2) + ' $';
+        case 'USD': return price.toFixed(2) + ' $';
+        case 'EUR': return price.toFixed(2) + ' €';
+        default: return price.toFixed(2);
     }
 }
 
