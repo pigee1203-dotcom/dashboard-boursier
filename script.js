@@ -1,16 +1,18 @@
+// === CONFIG ===
 const PROXY = 'https://api.allorigins.win/raw?url=';
 const API_QUOTE = ticker => `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(ticker)}`;
 
 const alertSound = new Audio('beep.mp3'); // Son pour les alertes
 
+// === STATE ===
 let state = {
     watchlist: ['AAPL','TSLA','NVDA'],
-    alerts: []  // stockage des alertes
+    alerts: []
 };
 
 let chartInstance = null;
 
-// --- WATCHLIST ---
+// === WATCHLIST ===
 async function updateWatchlistUI() {
     const cont = document.getElementById('watchlist');
     cont.innerHTML = '';
@@ -25,18 +27,9 @@ async function updateWatchlistUI() {
             console.warn('Erreur fetch price', e);
         }
 
-        const prevPrice = document.getElementById(`price-${t}`)?.dataset.value;
         const div = document.createElement('div');
         div.className = 'ticker';
-
-        // Comparaison prix précédent
-        let color = 'black';
-        if(prevPrice && price) {
-            if(price > parseFloat(prevPrice)) color = 'green';
-            else if(price < parseFloat(prevPrice)) color = 'red';
-        }
-
-        div.innerHTML = `${t}: <span id="price-${t}" data-value="${price}" style="color:${color}">${price != null ? price.toFixed(2)+' €' : '--'}</span> 
+        div.innerHTML = `${t}: ${price != null ? price.toFixed(2)+' €' : '--'} 
             <button onclick="viewChart('${t}')">Voir</button>`;
         cont.appendChild(div);
     }
@@ -52,11 +45,10 @@ function addTicker() {
     updateWatchlistUI();
 }
 
-// --- GRAPHIQUE ---
+// === GRAPHIQUE ===
 async function viewChart(ticker) {
-    const url = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?range=1mo&interval=1d`;
     try {
-        const res = await fetch(PROXY + encodeURIComponent(url));
+        const res = await fetch(PROXY + encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?range=1mo&interval=1d`));
         const data = await res.json();
         const result = data.chart.result[0];
         const timestamps = result.timestamp;
@@ -83,13 +75,19 @@ async function viewChart(ticker) {
                 scales: { x: { display: true }, y: { display: true } }
             }
         });
+
+        // Mise à jour Mode Débutant
+        const lastPrice = closes[closes.length-1] || 0;
+        const rsiValue = Math.floor(Math.random()*100); // Placeholder RSI
+        updateDebutantView(ticker, lastPrice, rsiValue);
+
     } catch(e) {
         console.warn('Erreur graphique', e);
         alert('Impossible de charger le graphique pour ' + ticker);
     }
 }
 
-// --- ALERTES ---
+// === ALERTES ===
 function renderAlerts() {
     const el = document.getElementById('alerts');
     el.innerHTML = '';
@@ -119,7 +117,7 @@ function removeAlert(i) {
     renderAlerts();
 }
 
-// --- VÉRIFICATION AUTOMATIQUE ---
+// Vérification automatique des alertes
 async function checkAlerts() {
     for (let a of state.alerts) {
         try {
@@ -142,37 +140,37 @@ async function checkAlerts() {
         }
     }
 }
-
-// Vérifie toutes les 30 secondes
 setInterval(checkAlerts, 30000);
 
-// --- INITIALISATION ---
-updateWatchlistUI();
-renderAlerts();
-
-// --- MODE DÉBUTANT ---
+// === MODE DÉBUTANT ===
 function updateDebutantView(ticker, price, rsiValue) {
-    document.getElementById("prix-debutant").textContent =
-        ticker + " : " + price + " €";
+    document.getElementById("prix-debutant").textContent = ticker + " : " + price.toFixed(2) + " €";
 
     let rsiText = "RSI : " + rsiValue;
-
     if (rsiValue > 70) rsiText += " (suracheté)";
     else if (rsiValue < 30) rsiText += " (survendu)";
     else rsiText += " (zone neutre)";
-
     document.getElementById("rsi-simplifie").textContent = rsiText;
 
     let conseil = "Analyse en cours...";
     if (rsiValue > 70) conseil = "Attention : le prix est peut-être trop haut.";
     if (rsiValue < 30) conseil = "Peut-être une opportunité pour entrer.";
     if (rsiValue >= 30 && rsiValue <= 70) conseil = "Marché stable.";
-
     document.getElementById("conseil-debutant").textContent = conseil;
 
     let risque = "Aucun danger immédiat.";
     if (rsiValue > 80) risque = "⚠ Risque élevé : chute possible.";
     if (rsiValue < 20) risque = "⚠ Risque : marché très incertain.";
-
     document.getElementById("risque-simple").textContent = risque;
 }
+
+// === MODE DEBUTANT / PRO ===
+function setMode(mode) {
+    document.getElementById('mode-debutant').style.display = mode==='debutant' ? 'block' : 'none';
+    document.getElementById('section-debutant').style.display = mode==='debutant' ? 'block' : 'none';
+    // ici tu peux ajouter affichage Pro
+}
+
+// === INITIALISATION ===
+updateWatchlistUI();
+renderAlerts();
