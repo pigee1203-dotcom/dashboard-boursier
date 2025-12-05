@@ -136,6 +136,29 @@ input, select {
     color: #0077cc;
     text-decoration: none;
 }
+#mode-switch {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+#mode-switch button {
+    padding: 10px 20px;
+    margin: 5px;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+#btn-debutant {
+    background: #4CAF50;
+    color: white;
+}
+
+#btn-pro {
+    background: #1E88E5;
+    color: white;
+}
 
 .news-item a:hover {
     text-decoration: underline;
