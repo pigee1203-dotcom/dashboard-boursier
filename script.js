@@ -15,8 +15,7 @@ let chartInstance = null;
 // === WATCHLIST ===
 async function updateWatchlistUI() {
     const cont = document.getElementById('watchlist');
-    div.innerHTML = `${t}: <span id="price-${t}" data-value="${price}" style="color:${color}">${formatPrice(price)}</span> 
-    <button onclick="viewChart('${t}')">Voir</button>`;
+    cont.innerHTML = '';
 
     for (const t of state.watchlist) {
         let price = null;
@@ -27,18 +26,30 @@ async function updateWatchlistUI() {
             if (quote && quote.regularMarketPrice != null) price = quote.regularMarketPrice;
         } catch(e) {
             console.warn('Erreur fetch price', e);
-            // --- INITIALISATION ---
-updateWatchlistUI();
-renderAlerts();
-
-// --- ÉVÉNEMENT POUR CHANGER LA DEVISE ---
-document.getElementById('currency-select').addEventListener('change', updateWatchlistUI);
-
         }
 
-       function formatPrice(price) {
+        const prevPrice = document.getElementById(`price-${t}`)?.dataset.value;
+        const div = document.createElement('div');
+        div.className = 'ticker';
+
+        // Comparaison prix précédent
+        let color = 'black';
+        if(prevPrice && price) {
+            if(price > parseFloat(prevPrice)) color = 'green';
+            else if(price < parseFloat(prevPrice)) color = 'red';
+        }
+
+        div.innerHTML = `${t}: <span id="price-${t}" data-value="${price}" style="color:${color}">${formatPrice(price)}</span> 
+        <button onclick="viewChart('${t}')">Voir</button>`;
+
+        cont.appendChild(div);
+    }
+}
+
+// === FORMAT PRIX ===
+function formatPrice(price) {
+    if (price == null) return '--';
     const currency = document.getElementById('currency-select').value;
-    if (!price) return '--';
     switch(currency) {
         case 'CAD': return price.toFixed(2) + ' $';
         case 'USD': return price.toFixed(2) + ' $';
@@ -182,6 +193,12 @@ function setMode(mode) {
     document.getElementById('section-debutant').style.display = mode==='debutant' ? 'block' : 'none';
     // ici tu peux ajouter affichage Pro
 }
+
+// === ÉVÉNEMENT POUR CHANGER LA DEVISE ===
+document.addEventListener('DOMContentLoaded', () => {
+    const select = document.getElementById('currency-select');
+    if (select) select.addEventListener('change', updateWatchlistUI);
+});
 
 // === INITIALISATION ===
 updateWatchlistUI();
