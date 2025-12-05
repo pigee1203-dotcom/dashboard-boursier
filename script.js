@@ -150,3 +150,30 @@ setInterval(checkAlerts, 30000);
 // --- INITIALISATION ---
 updateWatchlistUI();
 renderAlerts();
+(init(); ou la dernière fonction que tu as déjà)
+
+/* --- TU COLLES ICI --- */
+
+function updateDebutantView(ticker, price, rsiValue) {
+    document.getElementById("prix-debutant").textContent =
+        ticker + " : " + price + " €";
+
+    let rsiText = "RSI : " + rsiValue;
+
+    if (rsiValue > 70) rsiText += " (suracheté)";
+    else if (rsiValue < 30) rsiText += " (survendu)";
+    else rsiText += " (zone neutre)";
+
+    document.getElementById("rsi-simplifie").textContent = rsiText;
+
+    let conseil = "Analyse en cours...";
+    if (rsiValue > 70) conseil = "Attention : le prix est peut-être trop haut.";
+    if (rsiValue < 30) conseil = "Peut-être une opportunité pour entrer.";
+    if (rsiValue >= 30 && rsiValue <= 70) conseil = "Marché stable.";
+    document.getElementById("conseil-debutant").textContent = conseil;
+
+    let risque = "Aucun danger immédiat.";
+    if (rsiValue > 80) risque = "⚠ Risque élevé : chute possible.";
+    if (rsiValue < 20) risque = "⚠ Risque : marché très incertain.";
+    document.getElementById("risque-simple").textContent = risque;
+}
