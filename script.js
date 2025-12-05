@@ -72,31 +72,82 @@ function addTickerFromIcon(ticker) {
 }
 
 // --- GRAPHIQUE ---
+let chartInstance = null;
+let chartType = 'line';
+let currentTicker = '';
+
+// Fonction pour afficher le graphique
 async function viewChart(ticker) {
+    currentTicker = ticker;
     try {
         const res = await fetch(PROXY + encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?range=1mo&interval=1d`));
         const data = await res.json();
         const result = data.chart.result[0];
         const timestamps = result.timestamp;
-        const closes = result.indicators.quote[0].close;
-        const labels = timestamps.map(ts => new Date(ts*1000).toLocaleDateString());
-
+        const labels = timestamps.map(ts => new Date(ts * 1000));
         const ctx = document.getElementById('chart').getContext('2d');
-        if(chartInstance) chartInstance.destroy();
-        chartInstance = new Chart(ctx, {
-            type: 'line',
-            data: { labels, datasets: [{ label: ticker, data: closes, borderColor:'green', backgroundColor:'transparent', tension:0.25, pointRadius:0 }]},
-            options: { plugins: { legend: { position:'bottom' } }, scales: { x:{display:true}, y:{display:true} } }
-        });
 
-        const lastPrice = closes[closes.length-1] || 0;
-        const rsiValue = Math.floor(Math.random()*100); // Placeholder
-        updateDebutantView(ticker, lastPrice, rsiValue);
+        if(chartInstance) chartInstance.destroy();
+
+        if(chartType === 'line') {
+            const closes = result.indicators.quote[0].close;
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: ticker,
+                        data: closes,
+                        borderColor: 'green',
+                        backgroundColor: 'transparent',
+                        tension: 0.25,
+                        pointRadius: 0
+                    }]
+                },
+                options: {
+                    plugins: { legend: { position: 'bottom' } },
+                    scales: { x: { type: 'time', time: { unit: 'day' } }, y: { display: true } }
+                }
+            });
+
+            const lastPrice = closes[closes.length-1] || 0;
+            const rsiValue = Math.floor(Math.random() * 100);
+            updateDebutantView(ticker, lastPrice, rsiValue);
+
+        } else if(chartType === 'candlestick') {
+            const ohlc = result.indicators.quote[0].open.map((o, i) => ({
+                x: labels[i],
+                o: o,
+                h: result.indicators.quote[0].high[i],
+                l: result.indicators.quote[0].low[i],
+                c: result.indicators.quote[0].close[i]
+            }));
+
+            chartInstance = new Chart(ctx, {
+                type: 'candlestick',
+                data: { datasets: [{ label: ticker, data: ohlc }] },
+                options: {
+                    plugins: { legend: { position: 'bottom' } },
+                    scales: {
+                        x: { type: 'time', time: { unit: 'day' } },
+                        y: { display: true }
+                    }
+                }
+            });
+        }
+
     } catch(e) {
         console.warn('Erreur graphique', e);
         alert('Impossible de charger le graphique pour ' + ticker);
     }
 }
+
+// Fonction pour changer le type de graphique
+function toggleChartType() {
+    chartType = chartType === 'line' ? 'candlestick' : 'line';
+    if(currentTicker) viewChart(currentTicker);
+}
+
 
 // --- ALERTES ---
 function renderAlerts() {
