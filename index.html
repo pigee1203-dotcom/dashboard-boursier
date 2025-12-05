@@ -2,42 +2,45 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<title>Dashboard Boursier</title>
+<title>Dashboard Boursier Pro</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial/dist/chartjs-chart-financial.min.js"></script>
 <style>
-    body { font-family: Arial, sans-serif; background: #f5f6fa; color: #333; margin: 20px; }
-    h1 { text-align: center; color: #2f3640; }
-    .section { background: #fff; padding: 15px; margin-bottom: 20px; border-radius: 10px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
-    #watchlist .ticker { display: flex; justify-content: space-between; align-items: center; margin: 5px 0; padding: 5px 10px; border-radius: 5px; transition: 0.3s; }
-    #watchlist .ticker:hover { background: #f1f2f6; }
-    button { cursor: pointer; border: none; padding: 6px 12px; border-radius: 5px; background: #00a8ff; color: #fff; margin-left: 5px; transition: 0.3s; }
-    button:hover { background: #0097e6; }
-    #chart { width: 100%; max-width: 700px; height: 350px; margin: auto; display: block; }
-    .alert-item { padding: 5px; margin: 3px 0; border-left: 3px solid #ff4757; background: #fff3f3; border-radius: 5px; }
-    #mode-debutant { background: #e0f7fa; padding: 15px; border-radius: 10px; margin-top: 10px; }
-    .box { margin: 10px 0; padding: 10px; border-radius: 8px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-    .warning { background-color: #ffe5e5; }
-    #mode-switch { text-align: center; margin-bottom: 20px; }
+body { font-family: Arial, sans-serif; background: #f5f6fa; color: #333; margin: 20px; }
+h1 { text-align: center; color: #2f3640; }
+.section { background: #fff; padding: 15px; margin-bottom: 20px; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: 0.3s; }
+.section:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+#watchlist .ticker, #top-tickers .ticker { display: flex; justify-content: space-between; align-items: center; margin: 5px 0; padding: 5px 10px; border-radius: 8px; transition: 0.3s; }
+#watchlist .ticker:hover, #top-tickers .ticker:hover { background: #f1f2f6; transform: translateX(3px); }
+button { cursor: pointer; border: none; padding: 6px 12px; border-radius: 5px; background: #00a8ff; color: #fff; margin-left: 5px; transition: 0.3s; }
+button:hover { background: #0097e6; transform: scale(1.05); }
+#chart { width: 100%; max-width: 700px; height: 350px; margin: auto; display: block; }
+.alert-item { padding: 5px; margin: 3px 0; border-left: 4px solid #ff4757; background: #fff3f3; border-radius: 6px; transition: 0.3s; }
+.alert-item:hover { background: #ffe5e5; transform: translateX(3px); }
+#mode-debutant { background: #e0f7fa; padding: 15px; border-radius: 12px; margin-top: 10px; }
+.box { margin: 10px 0; padding: 12px; border-radius: 10px; background: #fff; box-shadow: 0 1px 5px rgba(0,0,0,0.1); }
+.warning { background-color: #ffe5e5; }
+#top-tickers { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+#top-tickers .ticker { flex: 1 1 120px; justify-content: center; flex-direction: column; text-align: center; padding: 10px; font-weight: bold; }
+#top-tickers .ticker img { width: 40px; height: 40px; margin-bottom: 5px; border-radius: 50%; }
 </style>
 </head>
 <body>
 
-<h1>Dashboard Boursier</h1>
+<h1>Dashboard Boursier Pro</h1>
 
 <div class="section">
     <h2>Ajouter un ticker</h2>
     <input type="text" placeholder="Ticker" id="new-ticker" list="tickers-list">
     <datalist id="tickers-list">
-        <option value="AAPL">
-        <option value="TSLA">
-        <option value="NVDA">
-        <option value="MSFT">
-        <option value="GOOGL">
-        <option value="AMZN">
-        <option value="META">
+        <option value="AAPL"><option value="TSLA"><option value="NVDA"><option value="MSFT"><option value="GOOGL"><option value="AMZN"><option value="META">
     </datalist>
     <button onclick="addTicker()">Ajouter</button>
+</div>
+
+<div class="section">
+    <h2>Top 5 Populaires</h2>
+    <div id="top-tickers"></div>
 </div>
 
 <div class="section">
@@ -70,10 +73,7 @@
     <h2>Alertes</h2>
     <input type="text" placeholder="Ticker" id="alert-ticker">
     <input type="number" placeholder="Prix" id="alert-price">
-    <select id="alert-direction">
-        <option value="above">Au-dessus</option>
-        <option value="below">En-dessous</option>
-    </select>
+    <select id="alert-direction"><option value="above">Au-dessus</option><option value="below">En-dessous</option></select>
     <button onclick="addAlert()">Créer alerte</button>
     <div id="alerts"></div>
 </div>
@@ -86,9 +86,19 @@ let chartInstance=null;
 let chartType='line';
 let currentTicker='';
 
+// Icônes des logos pour Top Tickers
+const logos={
+    'AAPL':'https://logo.clearbit.com/apple.com',
+    'TSLA':'https://logo.clearbit.com/tesla.com',
+    'NVDA':'https://logo.clearbit.com/nvidia.com',
+    'MSFT':'https://logo.clearbit.com/microsoft.com',
+    'GOOGL':'https://logo.clearbit.com/abc.xyz',
+    'AMZN':'https://logo.clearbit.com/amazon.com',
+    'META':'https://logo.clearbit.com/meta.com'
+};
+
 async function updateWatchlistUI(){
-    const cont=document.getElementById('watchlist');
-    cont.innerHTML='';
+    const cont=document.getElementById('watchlist'); cont.innerHTML='';
     for(const t of state.watchlist){
         let price=null;
         try{
@@ -105,6 +115,7 @@ async function updateWatchlistUI(){
             <button onclick="viewChart('${t}')">Voir</button>`;
         cont.appendChild(div);
     }
+    updateTopTickers();
 }
 
 function addTicker(){
@@ -114,6 +125,24 @@ function addTicker(){
     if(!state.watchlist.includes(t)) state.watchlist.push(t);
     input.value='';
     updateWatchlistUI();
+}
+
+async function updateTopTickers(){
+    const topDiv=document.getElementById('top-tickers'); topDiv.innerHTML='';
+    const popular=['AAPL','TSLA','NVDA','MSFT','GOOGL'];
+    for(const t of popular){
+        let price=0, change=0;
+        try{
+            const res=await fetch(PROXY+encodeURIComponent(API_QUOTE(t)));
+            const data=await res.json();
+            const quote=data.quoteResponse.result[0];
+            price=quote?.regularMarketPrice||0;
+            change=quote?.regularMarketChangePercent||0;
+        }catch(e){ console.warn(e);}
+        const div=document.createElement('div'); div.className='ticker';
+        div.innerHTML=`<img src="${logos[t]||''}" alt="${t}">${t}<br>${price.toFixed(2)} $<br><span style="color:${change>=0?'green':'red'}">${change.toFixed(2)}%</span>`;
+        topDiv.appendChild(div);
+    }
 }
 
 async function viewChart(ticker){
@@ -130,7 +159,7 @@ async function viewChart(ticker){
 
         if(chartType==='line'){
             const closes=result.indicators.quote[0].close;
-            chartInstance=new Chart(ctx,{type:'line',data:{labels:labels,datasets:[{label:ticker,data:closes,borderColor:'green',backgroundColor:'rgba(0,168,255,0.2)',tension:0.25,pointRadius:2}]}});
+            chartInstance=new Chart(ctx,{type:'line',data:{labels:labels,datasets:[{label:ticker,data:closes,borderColor:'#00a8ff',backgroundColor:'rgba(0,168,255,0.2)',tension:0.25,pointRadius:2}]}});
         } else {
             const ohlc=result.indicators.quote[0].open.map((o,i)=>({
                 x:labels[i],o:o,h:result.indicators.quote[0].high[i],l:result.indicators.quote[0].low[i],c:result.indicators.quote[0].close[i]
@@ -170,23 +199,18 @@ function removeAlert(i){ state.alerts.splice(i,1); renderAlerts(); }
 
 function updateDebutantView(ticker,price,rsi){
     document.getElementById("prix-debutant").textContent=ticker+" : "+price.toFixed(2)+" $";
-    let rsiText="RSI : "+rsi;
-    if(rsi>70) rsiText+=" (suracheté)"; else if(rsi<30) rsiText+=" (survendu)"; else rsiText+=" (zone neutre)";
+    let rsiText="RSI : "+rsi; if(rsi>70) rsiText+=" (suracheté)"; else if(rsi<30) rsiText+=" (survendu)"; else rsiText+=" (zone neutre)";
     document.getElementById("rsi-simplifie").textContent=rsiText;
-    let conseil="Analyse en cours..."; if(rsi>70) conseil="Attention : le prix est peut-être trop haut.";
-    if(rsi<30) conseil="Peut-être une opportunité."; if(rsi>=30&&rsi<=70) conseil="Marché stable.";
+    let conseil="Analyse en cours..."; if(rsi>70) conseil="Attention : prix élevé."; if(rsi<30) conseil="Opportunité d'achat."; if(rsi>=30&&rsi<=70) conseil="Marché stable.";
     document.getElementById("conseil-debutant").textContent=conseil;
-    let risque="Aucun danger immédiat."; if(rsi>80) risque="⚠ Risque élevé : chute possible."; if(rsi<20) risque="⚠ Risque : marché très incertain.";
+    let risque="Aucun danger."; if(rsi>80) risque="⚠ Risque élevé."; if(rsi<20) risque="⚠ Risque très incertain.";
     document.getElementById("risque-simple").textContent=risque;
 }
 
-function setMode(mode){
-    document.getElementById('mode-debutant').style.display=mode==='debutant'?'block':'none';
-}
+function setMode(mode){ document.getElementById('mode-debutant').style.display=mode==='debutant'?'block':'none'; }
 
 updateWatchlistUI();
 renderAlerts();
 </script>
-
 </body>
 </html>
