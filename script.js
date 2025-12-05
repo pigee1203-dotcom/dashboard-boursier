@@ -15,7 +15,9 @@ let chartInstance = null;
 // === WATCHLIST ===
 async function updateWatchlistUI() {
     const cont = document.getElementById('watchlist');
-    cont.innerHTML = '';
+    div.innerHTML = `${t}: <span id="price-${t}" data-value="${price}" style="color:${color}">${price != null ? price.toFixed(2)+' €' : '--'}</span> 
+    <button onclick="viewChart('${t}')">Voir</button>`;
+
     for (const t of state.watchlist) {
         let price = null;
         try {
