@@ -6,9 +6,21 @@ const alertSound = new Audio('beep.mp3');
 // --- STATE ---
 let state = {
     watchlist: ['AAPL','TSLA','NVDA'],
-    alerts: []
+    alerts: [],
+    currency: 'USD'  // devise par défaut
 };
 let chartInstance = null;
+
+// --- FONCTION FORMAT PRIX ---
+function formatPrice(price) {
+    if (!price) return '--';
+    switch(state.currency) {
+        case 'CAD': return price.toFixed(2) + ' $';
+        case 'USD': return price.toFixed(2) + ' $';
+        case 'EUR': return price.toFixed(2) + ' €';
+        default: return price.toFixed(2);
+    }
+}
 
 // --- WATCHLIST ---
 async function updateWatchlistUI() {
