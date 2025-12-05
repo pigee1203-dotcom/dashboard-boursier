@@ -1,24 +1,20 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <title>Dashboard Boursier</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial/dist/chartjs-chart-financial.min.js"></script>
-    <style>
-        #chart {
-            width: 100%;
-            max-width: 500px;
-            height: 300px;
-        }
-        .section { margin-bottom: 20px; }
-        .ticker { margin: 5px 0; }
-        .alert-item { margin: 3px 0; }
-        #mode-switch { margin-top: 20px; }
-        .box { border: 1px solid #ccc; padding: 10px; margin: 5px 0; border-radius: 5px; }
-        .warning { background-color: #ffe5e5; }
-    </style>
+<meta charset="UTF-8">
+<title>Dashboard Boursier</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial/dist/chartjs-chart-financial.min.js"></script>
+<style>
+    #chart { width: 100%; max-width: 600px; height: 300px; }
+    .section { margin-bottom: 20px; }
+    .ticker { margin: 5px 0; }
+    .alert-item { margin: 3px 0; }
+    #mode-switch { margin-top: 20px; }
+    .box { border: 1px solid #ccc; padding: 10px; margin: 5px 0; border-radius: 5px; }
+    .warning { background-color: #ffe5e5; }
+</style>
 </head>
 <body>
 <h1>Dashboard Boursier</h1>
@@ -26,7 +22,16 @@
 <!-- Ajouter un ticker -->
 <div class="section">
     <h2>Ajouter un ticker</h2>
-    <input type="text" placeholder="Ticker" id="new-ticker">
+    <input type="text" placeholder="Ticker" id="new-ticker" list="tickers-list">
+    <datalist id="tickers-list">
+        <option value="AAPL">
+        <option value="TSLA">
+        <option value="NVDA">
+        <option value="MSFT">
+        <option value="GOOGL">
+        <option value="AMZN">
+        <option value="META">
+    </datalist>
     <button onclick="addTicker()">Ajouter</button>
 </div>
 
@@ -111,32 +116,28 @@ let chartInstance = null;
 let chartType = 'line';
 let currentTicker = '';
 
-async function updateWatchlistUI() {
-    const cont = document.getElementById('watchlist');
-    cont.innerHTML = '';
-    for(const t of state.watchlist) {
-        let price = null;
-        try {
-            const res = await fetch(PROXY + encodeURIComponent(API_QUOTE(t)));
-            const data = await res.json();
-            const quote = data.quoteResponse.result[0];
-            if(quote && quote.regularMarketPrice != null) price = quote.regularMarketPrice;
-        } catch(e){ console.warn('Erreur fetch price', e); }
+async function updateWatchlistUI(){
+    const cont=document.getElementById('watchlist'); cont.innerHTML='';
+    for(const t of state.watchlist){
+        let price=null;
+        try{
+            const res=await fetch(PROXY+encodeURIComponent(API_QUOTE(t)));
+            const data=await res.json();
+            const quote=data.quoteResponse.result[0];
+            if(quote && quote.regularMarketPrice!=null) price=quote.regularMarketPrice;
+        }catch(e){ console.warn('Erreur fetch price', e); }
 
-        const prevPrice = document.getElementById(`price-${t}`)?.dataset.value;
-        const div = document.createElement('div'); div.className='ticker';
-        let color='black';
-        if(prevPrice && price){ color = price>parseFloat(prevPrice)?'green':'red'; }
-
-        div.innerHTML = `${t}: <span id="price-${t}" data-value="${price}" style="color:${color}">${price!=null?price.toFixed(2)+' €':'--'}</span> 
-            <button onclick="viewChart('${t}')">Voir</button>`;
+        const prevPrice=document.getElementById(`price-${t}`)?.dataset.value;
+        const div=document.createElement('div'); div.className='ticker';
+        let color='black'; if(prevPrice && price){ color=price>parseFloat(prevPrice)?'green':'red'; }
+        div.innerHTML=`${t}: <span id="price-${t}" data-value="${price}" style="color:${color}">${price!=null?price.toFixed(2)+' €':'--'}</span> <button onclick="viewChart('${t}')">Voir</button>`;
         cont.appendChild(div);
     }
 }
 
-function addTicker() {
-    const input = document.getElementById('new-ticker');
-    const t = input.value.trim().toUpperCase();
+function addTicker(){
+    const input=document.getElementById('new-ticker');
+    const t=input.value.trim().toUpperCase();
     if(!t) return alert('Ticker vide');
     if(!state.watchlist.includes(t)) state.watchlist.push(t);
     input.value='';
@@ -146,9 +147,9 @@ function addTicker() {
 async function viewChart(ticker){
     currentTicker=ticker;
     try{
-        const res = await fetch(PROXY+encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?range=1mo&interval=1d`));
-        const data = await res.json();
-        const result = data.chart.result[0];
+        const res=await fetch(PROXY+encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?range=1mo&interval=1d`));
+        const data=await res.json();
+        const result=data.chart.result[0];
         const timestamps=result.timestamp;
         const labels=timestamps.map(ts=>new Date(ts*1000).toLocaleDateString());
         const ctx=document.getElementById('chart').getContext('2d');
@@ -157,20 +158,33 @@ async function viewChart(ticker){
 
         if(chartType==='line'){
             const closes=result.indicators.quote[0].close;
-            chartInstance=new Chart(ctx,{type:'line',data:{labels:labels,datasets:[{label:ticker,data:closes,borderColor:'green',backgroundColor:'transparent',tension:0.25,pointRadius:0}]},options:{plugins:{legend:{position:'bottom'}},scales:{x:{display:true},y:{display:true}}}});
+            chartInstance=new Chart(ctx,{
+                type:'line',
+                data:{labels:labels,datasets:[{label:ticker,data:closes,borderColor:'green',backgroundColor:'transparent',tension:0.25,pointRadius:0}]},
+                options:{plugins:{legend:{position:'bottom'}},scales:{x:{display:true},y:{display:true}}}
+            });
             const lastPrice=closes[closes.length-1]||0;
             const rsiValue=Math.floor(Math.random()*100);
             updateDebutantView(ticker,lastPrice,rsiValue);
         } else {
-            const ohlc=result.indicators.quote[0].open.map((o,i)=>({x:labels[i],o:o,h:result.indicators.quote[0].high[i],l:result.indicators.quote[0].low[i],c:result.indicators.quote[0].close[i]}));
-            chartInstance=new Chart(ctx,{type:'candlestick',data:{datasets:[{label:ticker,data:ohlc}]},options:{plugins:{legend:{position:'bottom'}},scales:{x:{display:true},y:{display:true}}}});
+            const ohlc=result.indicators.quote[0].open.map((o,i)=>({
+                x:labels[i],
+                o:o,
+                h:result.indicators.quote[0].high[i],
+                l:result.indicators.quote[0].low[i],
+                c:result.indicators.quote[0].close[i]
+            }));
+            chartInstance=new Chart(ctx,{
+                type:'candlestick',
+                data:{datasets:[{label:ticker,data:ohlc}]},
+                options:{plugins:{legend:{position:'bottom'}},scales:{x:{display:true},y:{display:true}}}
+            });
         }
-
-    } catch(e){ console.warn('Erreur graphique', e); alert('Impossible de charger le graphique pour '+ticker);}
+    }catch(e){console.warn('Erreur graphique',e); alert('Impossible de charger le graphique pour '+ticker);}
 }
 
 function toggleChartType(){
-    chartType = chartType==='line'?'candlestick':'line';
+    chartType=chartType==='line'?'candlestick':'line';
     if(currentTicker) viewChart(currentTicker);
 }
 
@@ -206,7 +220,7 @@ async function checkAlerts(){
             if(!price) continue;
             if(a.direction==='above'&&price>=a.price){ alert(`ALERTE: ${a.ticker} est au-dessus de ${a.price} (actuel: ${price})`); alertSound.play(); }
             if(a.direction==='below'&&price<=a.price){ alert(`ALERTE: ${a.ticker} est en-dessous de ${a.price} (actuel: ${price})`); alertSound.play(); }
-        }catch(e){console.warn('Erreur check alert', e);}
+        }catch(e){console.warn('Erreur check alert',e);}
     }
 }
 setInterval(checkAlerts,30000);
