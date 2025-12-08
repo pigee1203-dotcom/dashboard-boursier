@@ -752,6 +752,10 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('rangeSelect').value = state.currentRange;
   refreshAll();
   setInterval(storeState, 5000);
+  if (localStorage.getItem('onboardingShown') !== 'true') {
+    showOnboarding();
+    localStorage.setItem('onboardingShown', 'true');
+  }
 });
 </script>
 </body>
