@@ -13,7 +13,7 @@
    CSS: MISE EN PAGE ET STYLES
    ==================== */
 :root {
-    /* Nouvelle Palette de Couleurs */
+    /* Palette de Couleurs "Glass Pro" */
     --primary: #2c776e;      /* Vert-bleu foncé (professionnel) */
     --accent: #4CAF50;       /* Vert pour la hausse */
     --danger: #f44336;       /* Rouge pour la baisse */
@@ -174,7 +174,7 @@ button:hover, .btn:hover {
           <div><strong>Watchlist</strong><div style="font-size:12px;color:var(--text-muted)">Tout est mis à jour automatiquement</div></div>
           <div style="display:flex;gap:8px;align-items:center">
             <input id="addTickerInput" placeholder="Ajouter (ex: AAPL)" class="small-input">
-            <button class="btn" onclick="addTickerFromInput()">Ajouter</button>
+            <button class="btn primary" onclick="addTickerFromInput()">Ajouter</button>
           </div>
         </div>
         <div class="watchlist-list" id="watchlistList"></div>
@@ -186,7 +186,7 @@ button:hover, .btn:hover {
           <input id="alertTicker" placeholder="Ticker" class="small-input" style="width:90px">
           <input id="alertPrice" placeholder="Prix" type="number" class="small-input" style="width:110px">
           <select id="alertDir" class="small-input" style="width:110px"><option value="above">Au-dessus</option><option value="below">En-dessous</option></select>
-          <button class="btn" onclick="createAlert()">Créer</button>
+          <button class="btn primary" onclick="createAlert()">Créer</button>
         </div>
         <div id="alertsList" style="margin-top:12px"></div>
 
@@ -196,7 +196,7 @@ button:hover, .btn:hover {
             <input id="accountSize" placeholder="Capital" type="number" class="small-input" style="width:120px">
             <input id="riskPct" placeholder="% risque" type="number" class="small-input" style="width:100px">
             <input id="stopDist" placeholder="Stop (€)" type="number" class="small-input" style="width:110px">
-            <button class="btn" onclick="calculatePosition()">Calculer</button>
+            <button class="btn primary" onclick="calculatePosition()">Calculer</button>
           </div>
           <div id="positionResult" style="margin-top:8px;font-weight:800"></div>
         </div>
@@ -207,7 +207,7 @@ button:hover, .btn:hover {
             <input id="ptTicker" placeholder="Ticker" class="small-input" style="width:100px">
             <input id="ptQty" placeholder="Qty" type="number" class="small-input" style="width:80px">
             <input id="ptPrice" placeholder="Price" type="number" class="small-input" style="width:100px">
-            <button class="btn" onclick="addPaperTrade()">Ajouter</button>
+            <button class="btn primary" onclick="addPaperTrade()">Ajouter</button>
           </div>
           <div id="paperTradesList" style="margin-top:10px;max-height:140px;overflow:auto"></div>
         </div>
