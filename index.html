@@ -121,20 +121,16 @@ body{
     <button class="btn ghost" onclick="showOnboarding()">Tutoriel</button>
   </div>
 
-  <div class="grid">
-    <!-- LEFT COLUMN -->
-    <div class="left">
-      <div class="panel">
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <div><strong>Watchlist</strong><div style="font-size:12px;color:var(--muted)">Tout est mis à jour automatiquement</div></div>
-          <div style="display:flex;gap:8px;align-items:center">
-            <input id="addTickerInput" placeholder="Ajouter (ex: AAPL)" class="small-input">
-            <button class="btn" onclick="addTickerFromInput()">Ajouter</button>
-          </div>
-        </div>
-        <div class="watchlist-list" id="watchlistList"></div>
-      </div>
-
+  <div class="left">
+      <div class="section">          <div style="display:flex;justify-content:space-between;align-items:center">
+          <div><strong>Watchlist</strong><div style="font-size:12px;color:var(--muted)">Tout est mis à jour automatiquement</div></div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <input id="addTickerInput" placeholder="Ajouter (ex: AAPL)" class="small-input">
+            <button class="btn" onclick="addTickerFromInput()">Ajouter</button>
+          </div>
+        </div>
+        <div class="watchlist-list" id="watchlistList"></div>
+      </div>
       <div class="panel" style="margin-top:12px">
         <strong>Alertes & Paper-trade</strong>
         <div style="display:flex;gap:8px;margin-top:10px">
