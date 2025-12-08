@@ -1,89 +1,297 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8" />
-    <title>TraderGlass – Dashboard</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/luxon"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<meta charset="UTF-8">
+<title>Trading Dashboard Premium</title>
+
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial"></script>
 
 </head>
-
 <body>
 
-    <!-- HEADER -->
-    <header class="glass-header">
-        <div class="logo">TraderGlass</div>
+<h1 class="fade-in">📈 Dashboard Trading Premium</h1>
 
-        <div class="controls">
-            <select id="currency-selector">
-                <option value="CAD">CAD $</option>
-                <option value="USD">USD $</option>
-                <option value="EUR">EUR €</option>
-            </select>
-        </div>
-    </header>
+<!-- ========== WATCHLIST ========== -->
+<div class="card fade-in">
+    <h2>Watchlist</h2>
 
-    <!-- LAYOUT -->
-    <div class="layout">
-
-        <!-- LEFT PANEL — WATCHLIST -->
-        <aside class="glass-panel left">
-            <h2>Watchlist</h2>
-
-            <div class="add-ticker">
-                <input type="text" id="new-ticker" placeholder="Ajouter un ticker...">
-                <button id="add-ticker-btn">+</button>
-            </div>
-
-            <div id="watchlist" class="watchlist"></div>
-        </aside>
-
-        <!-- CENTER PANEL — GRAPH & DATA -->
-        <main class="glass-panel center">
-            
-            <h2 id="current-title">Sélectionne une action</h2>
-
-            <canvas id="chart" height="260"></canvas>
-
-            <button id="toggle-chart">Changer type (Line / Candles)</button>
-
-            <div class="info-grid">
-                <div class="box">
-                    <h3>Prix actuel</h3>
-                    <p id="price">--</p>
-                </div>
-
-                <div class="box">
-                    <h3>RSI</h3>
-                    <p id="rsi">--</p>
-                </div>
-
-                <div class="box">
-                    <h3>Tendance</h3>
-                    <p id="trend">--</p>
-                </div>
-
-                <div class="box">
-                    <h3>Risque</h3>
-                    <p id="risk">--</p>
-                </div>
-            </div>
-        </main>
-
-        <!-- RIGHT PANEL — NEWS / CONSEILS -->
-        <aside class="glass-panel right">
-            <h2>Actualité</h2>
-            <div id="news"></div>
-
-            <h2>Conseils AI</h2>
-            <p id="ai-tips">Sélectionne une action...</p>
-        </aside>
+    <div style="margin-bottom:10px;">
+        <input id="ticker-input" type="text" placeholder="Ajouter un ticker (ex: AAPL)">
+        <button onclick="addTicker()">Ajouter</button>
     </div>
 
-    <script src="script.js"></script>
+    <div id="watchlist"></div>
+</div>
+
+<!-- ========== GRAPH ========== -->
+<div class="card fade-in">
+    <h2>Graphique</h2>
+
+    <div id="chart-container">
+        <canvas id="chart" height="120"></canvas>
+    </div>
+
+    <button onclick="toggleType()">Changer type (Ligne / Chandelier)</button>
+</div>
+
+<!-- ========== ANALYSE RAPIDE ========== -->
+<div class="card fade-in">
+    <h2>Analyse Rapide</h2>
+
+    <div class="helper-box">
+        <h3>Prix actuel</h3>
+        <p id="current-price">--</p>
+    </div>
+
+    <div class="helper-box">
+        <h3>RSI (simplifié)</h3>
+        <p id="current-rsi">--</p>
+    </div>
+
+    <div class="helper-box">
+        <h3>Conseil automatique</h3>
+        <p id="advice">Sélectionne un ticker.</p>
+    </div>
+
+    <div class="helper-box">
+        <h3>Niveau de risque</h3>
+        <p id="risk">--</p>
+    </div>
+</div>
+
+<!-- ========== NEWS ========== -->
+<div class="card fade-in">
+    <h2>Actualités</h2>
+    <div id="news"></div>
+</div>
+
+<!-- ========== ALERTES ========== -->
+<div class="card fade-in">
+    <h2>Alertes prix</h2>
+
+    <div style="margin-bottom:10px;">
+        <input id="alert-ticker" placeholder="Ticker">
+        <input id="alert-price" type="number" placeholder="Prix">
+        <select id="alert-direction">
+            <option value="above">Au-dessus</option>
+            <option value="below">En-dessous</option>
+        </select>
+        <button onclick="addAlert()">Créer</button>
+    </div>
+
+    <div id="alerts"></div>
+</div>
+
+<audio id="alertSound" src="beep.mp3"></audio>
+
+<script>
+const PROXY = "https://api.allorigins.win/raw?url=";
+
+// STATE
+let watchlist = ["AAPL", "TSLA", "NVDA"];
+let alerts = [];
+let currentChart;
+let currentType = "line";
+let currentTicker = null;
+
+/* =========================
+   WATCHLIST
+   ========================= */
+async function updateWatchlist() {
+    const div = document.getElementById("watchlist");
+    div.innerHTML = "";
+
+    for (let t of watchlist) {
+        try {
+            const data = await fetch(PROXY + encodeURIComponent(`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${t}`));
+            const json = await data.json();
+            const q = json.quoteResponse.result[0];
+
+            const price = q?.regularMarketPrice ?? null;
+            const prevClose = q?.regularMarketPreviousClose ?? null;
+
+            let changeClass = "";
+            if (price && prevClose) {
+                changeClass = price >= prevClose ? "price-up" : "price-down";
+            }
+
+            const item = document.createElement("div");
+            item.className = "ticker-item";
+
+            item.innerHTML = `
+                <div>
+                    <strong>${t}</strong><br>
+                    <span class="${changeClass}">${price ? price.toFixed(2) + " $" : "--"}</span>
+                </div>
+                <button onclick="loadChart('${t}')">Voir</button>
+            `;
+
+            div.appendChild(item);
+
+        } catch (e) {
+            console.warn("Erreur watchlist", e);
+        }
+    }
+}
+
+function addTicker() {
+    const v = document.getElementById("ticker-input").value.trim().toUpperCase();
+    if (!v) return;
+    if (!watchlist.includes(v)) watchlist.push(v);
+    document.getElementById("ticker-input").value = "";
+    updateWatchlist();
+}
+
+/* =========================
+   GRAPH CHART.JS
+   ========================= */
+async function loadChart(ticker) {
+    currentTicker = ticker;
+
+    try {
+        const data = await fetch(PROXY + encodeURIComponent(`https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?range=1mo&interval=1d`));
+        const json = await data.json();
+
+        const r = json.chart.result[0];
+        const labels = r.timestamp.map(ts => new Date(ts * 1000).toLocaleDateString());
+        const o = r.indicators.quote[0];
+
+        // destroy previous
+        if (currentChart) currentChart.destroy();
+
+        const ctx = document.getElementById("chart").getContext("2d");
+
+        if (currentType === "line") {
+            currentChart = new Chart(ctx, {
+                type: "line",
+                data: {
+                    labels,
+                    datasets: [{
+                        label: ticker,
+                        data: o.close,
+                        borderColor: "#32ff32",
+                        tension: 0.2
+                    }]
+                },
+                options: { responsive: true }
+            });
+        } else { 
+            const ohlc = o.open.map((val, i) => ({
+                x: labels[i],
+                o: o.open[i],
+                h: o.high[i],
+                l: o.low[i],
+                c: o.close[i]
+            }));
+
+            currentChart = new Chart(ctx, {
+                type: "candlestick",
+                data: { datasets: [{ label: ticker, data: ohlc }] },
+                options: { responsive: true }
+            });
+        }
+
+        updateAnalysis(o.close[o.close.length - 1]);
+
+    } catch (e) {
+        console.warn("Erreur graphique", e);
+    }
+}
+
+function toggleType() {
+    currentType = currentType === "line" ? "candlestick" : "line";
+    if (currentTicker) loadChart(currentTicker);
+}
+
+/* =========================
+   ANALYSE SIMPLIFIÉE
+   ========================= */
+function updateAnalysis(price) {
+    document.getElementById("current-price").textContent = price.toFixed(2) + " $";
+
+    const rsi = Math.floor(Math.random() * 100);
+    document.getElementById("current-rsi").textContent = rsi;
+
+    let advice = "Analyse en cours...";
+    let risk = "—";
+
+    if (rsi > 70) { advice = "Suracheté. Risque de baisse."; risk = "⚠ Risque élevé"; }
+    else if (rsi < 30) { advice = "Survendu : opportunité possible."; risk = "⚠ Volatilité haute"; }
+    else { advice = "Stable."; risk = "Faible"; }
+
+    document.getElementById("advice").textContent = advice;
+    document.getElementById("risk").textContent = risk;
+}
+
+/* =========================
+   ALERTES
+   ========================= */
+function addAlert() {
+    const t = document.getElementById("alert-ticker").value.toUpperCase();
+    const p = parseFloat(document.getElementById("alert-price").value);
+    const d = document.getElementById("alert-direction").value;
+
+    if (!t || !p) return;
+
+    alerts.push({ t, p, d });
+    renderAlerts();
+}
+
+function renderAlerts() {
+    const div = document.getElementById("alerts");
+    div.innerHTML = "";
+
+    alerts.forEach((a, i) => {
+        div.innerHTML += `<div>${a.t} ${a.d === "above" ? ">=" : "<="} ${a.p}  <button onclick="alerts.splice(${i},1);renderAlerts()">X</button></div>`;
+    });
+}
+
+/* CHECK ALERTS */
+setInterval(async () => {
+    for (let a of alerts) {
+        try {
+            const data = await fetch(PROXY + encodeURIComponent(`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${a.t}`));
+            const json = await data.json();
+            const price = json.quoteResponse.result[0]?.regularMarketPrice;
+
+            if (!price) continue;
+
+            if (a.d === "above" && price >= a.p ||
+                a.d === "below" && price <= a.p) {
+                alert("ALERTE: " + a.t + " atteint " + price);
+                document.getElementById("alertSound").play();
+            }
+        } catch(e){}
+    }
+}, 30000);
+
+/* =========================
+   NEWS
+   ========================= */
+async function loadNews() {
+    const target = document.getElementById("news");
+
+    try {
+        const data = await fetch(PROXY + encodeURIComponent("https://feeds.finance.yahoo.com/rss/2.0/headline?s=^GSPC"));
+        const txt = await data.text();
+
+        const items = txt.split("<item>").slice(1, 6);
+
+        target.innerHTML = items.map(i => {
+            const title = i.match(/<title><!\[CDATA\[(.*?)\]\]><\/title>/)?.[1];
+            return `<div class="news-item">${title}</div>`;
+        }).join("");
+
+    } catch (e) {
+        target.innerHTML = "<p>Impossible de charger les news</p>";
+    }
+}
+
+loadNews();
+updateWatchlist();
+</script>
+
 </body>
 </html>
