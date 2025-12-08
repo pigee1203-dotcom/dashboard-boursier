@@ -11,116 +11,147 @@
 
 <style>
 /* ======= THEME: Desktop Glass (light) with pale green accents ======= */
-:root{
-  --bg:#f5f8fa;
-  --panel: rgba(255,255,255,0.72); /* glass, no blur */
-  --panel-border: rgba(0,0,0,0.06);
-  --accent: #7dd3a6; /* pale green */
-  --accent-2: #60a5fa; /* soft blue */
-  --muted: #64748b;
-  --danger: #ff6b6b;
-  --card-radius:14px;
-  --shadow: 0 10px 30px rgba(2,6,23,0.06);
-  font-family: Inter, "Segoe UI", Roboto, Arial, sans-serif;
-  -webkit-font-smoothing:antialiased;
-}
-*{box-sizing:border-box}
-html,body{height:100%}
-body{
-  margin:0; background: linear-gradient(180deg,#f8fbfc,#eef6f0); color:#082033; padding:20px;
+/* NOUVEAU STYLE (EMBELLISSEMENT FINAL) */
+
+:root {
+    /* Nouvelle Palette de Couleurs */
+    --primary: #2c776e;      /* Vert-bleu foncé (professionnel) */
+    --accent: #4CAF50;       /* Vert pour la hausse */
+    --danger: #f44336;       /* Rouge pour la baisse */
+    --bg-light: #f9fbfd;     /* Fond très clair */
+    --shadow-soft: 0 4px 12px rgba(0,0,0,0.08); /* Ombre douce */
+    --text-muted: #6b7280;   /* Gris pour les textes secondaires */
+    --card-radius: 12px;
+    font-family: 'Roboto', Arial, sans-serif; /* Police claire et lisible */
 }
 
-/* Container */
-.container{max-width:1360px;margin:0 auto}
+body {
+    font-family: var(--font-family);
+    background-color: var(--bg-light);
+    background: linear-gradient(180deg, var(--bg-light), #e6f0f2); /* Dégradé doux */
+    margin: 0;
+    padding: 20px;
+    color: #1f2937; /* Texte très foncé */
+}
+.container{
+    max-width: 1400px;
+    margin: 0 auto;
+}
 
-/* Header */
-.header{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
-.title h1{margin:0;font-size:26px}
-.title p{margin:6px 0 0;color:var(--muted);font-size:13px}
-.top-stats{display:flex;gap:12px;margin-top:12px;flex-wrap:wrap}
-.stat{background:var(--panel);border:1px solid var(--panel-border);padding:10px 14px;border-radius:12px;min-width:140px;box-shadow:var(--shadow)}
-.stat .label{font-size:12px;color:var(--muted)}
-.stat .value{font-size:18px;font-weight:700;margin-top:6px;color:#0b2b20}
+/* ------------------------------------- */
+/* --- BOUTONS / INPUTS --- */
+/* ------------------------------------- */
 
-/* Controls */
-.controls{margin-top:12px;display:flex;gap:12px;align-items:center;padding:10px;border-radius:12px;background:transparent}
-.controls input,.controls select,.controls button{padding:8px 10px;border-radius:10px;border:1px solid var(--panel-border);background:var(--panel);font-size:14px}
-.controls input{min-width:300px}
-.btn{background:linear-gradient(90deg,var(--accent),var(--accent-2));border:none;color:white;padding:9px 12px;border-radius:10px;cursor:pointer;font-weight:700}
-.btn.ghost{background:transparent;border:1px solid rgba(6,10,25,0.04);color:var(--muted)}
+button, .btn {
+    padding: 8px 12px;
+    margin-left: 5px;
+    cursor: pointer;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    transition: all 0.2s;
+    font-weight: 600;
+}
+button:hover, .btn:hover {
+    background-color: #e0e0e0;
+    border-color: #9ca3af;
+}
 
-/* Grid layout */
-.grid{display:grid;grid-template-columns:360px 1fr;gap:16px;margin-top:16px;align-items:start}
-.left{display:flex;flex-direction:column;gap:12px}
-.panel{background:var(--panel);border:1px solid var(--panel-border);padding:12px;border-radius:var(--card-radius);box-shadow:var(--shadow)}
-.watchlist-list{display:flex;flex-direction:column;gap:10px;max-height:720px;overflow:auto;padding-right:6px}
-.ticker-item{display:flex;justify-content:space-between;align-items:center;padding:10px;border-radius:10px;background:linear-gradient(180deg,rgba(255,255,255,0.9),rgba(250,250,250,0.9));border:1px solid rgba(0,0,0,0.02)}
-.ticker-left{display:flex;gap:12px;align-items:center}
-.ticker-symbol{font-weight:800;color:#082033}
-.ticker-price{font-weight:700}
-.ticker-meta{font-size:12px;color:var(--muted)}
+/* Boutons d'action principale */
+.btn.primary {
+    background: var(--primary);
+    color: white;
+    border: none;
+}
+.btn.primary:hover {
+    background: #1e5a51;
+}
 
-/* Right */
-.right{display:flex;flex-direction:column;gap:12px}
-.chart-card{padding:14px;border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,0.92),rgba(246,253,249,0.9));border:1px solid var(--panel-border)}
-.chart-head{display:flex;justify-content:space-between;align-items:center}
-.chart-controls{display:flex;gap:8px;align-items:center;margin-top:8px}
-.detail-pill{padding:8px 12px;border-radius:999px;background:rgba(0,0,0,0.02);font-size:13px;color:var(--muted);border:1px solid rgba(0,0,0,0.04)}
+.controls input, .controls select {
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    background-color: white;
+}
 
-/* Table */
-.table{margin-top:12px;border-radius:10px;overflow:hidden}
-.row{display:flex;gap:8px;align-items:center;padding:10px;border-bottom:1px solid rgba(0,0,0,0.03)}
-.row .col{flex:1;font-size:13px;color:#082033}
-.row .col.small{flex:0 0 120px;text-align:right;color:var(--muted)}
+/* ------------------------------------- */
+/* --- MISE EN PAGE / SECTIONS --- */
+/* ------------------------------------- */
 
-/* Heatmap/scanner */
-.scanner-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
-.heatmap{display:flex;flex-wrap:wrap;gap:8px}
-.heat-tile{width:92px;height:56px;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:13px;color:#082033;box-shadow:0 6px 18px rgba(2,6,23,0.04);font-weight:700}
-
-/* Small utilities */
-.small-input{padding:8px;border-radius:8px;border:1px solid var(--panel-border);background:var(--panel)}
-.icon-btn{background:transparent;border:1px solid var(--panel-border);padding:8px;border-radius:8px;cursor:pointer}
-
-/* bottom sticky actions */
-.bottom-actions{position:fixed;right:22px;bottom:22px;display:flex;flex-direction:column;gap:8px;z-index:999}
-.quick-btn{background:linear-gradient(90deg,var(--accent),var(--accent-2));color:white;padding:10px 12px;border-radius:10px;font-weight:700;border:none;cursor:pointer}
-
-/* modal & popup */
-.popup{position:fixed;left:22px;top:22px;z-index:1500;min-width:240px;padding:12px;border-radius:10px;background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#02251c;font-weight:700;box-shadow:var(--shadow)}
-.modal-bg{position:fixed;left:0;top:0;width:100%;height:100%;background:rgba(2,6,23,0.3);display:flex;align-items:center;justify-content:center;z-index:2000}
-.modal{background:white;padding:18px;border-radius:12px;max-width:900px;box-shadow:var(--shadow)}
-
-/* responsive */
+.grid {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 24px; /* Augmenté l'espacement pour l'aération */
+    margin-top: 24px;
+    align-items: start;
+}
 @media (max-width:1100px){
-  .grid{grid-template-columns:1fr}
-  .left{order:2}
-  .right{order:1}
+    .grid{ grid-template-columns:1fr; }
 }
-</style>
-</head>
-<body>
-<div class="container">
-  <div class="header">
-    <div class="title">
-      <h1>Mon Dashboard Boursier — Desktop (Glass)</h1>
-      <p>Tout visible — conseils débutant, news & probabilités — design clair, vert pâle.</p>
-      <div class="top-stats" id="topStats"></div>
-    </div>
-    <div style="text-align:right">
-      <div style="font-size:13px;color:var(--muted);margin-bottom:8px">Compte</div>
-      <div style="background:linear-gradient(90deg,var(--accent),var(--accent-2));color:#042018;padding:8px 12px;border-radius:10px;font-weight:800">Pro</div>
-    </div>
-  </div>
+.left{ order:2; }
+.right{ order:1; }
 
-  <div class="controls">
-    <input id="searchInput" placeholder="Rechercher (ex : AAPL, Tesla, NVDA...)">
-    <select id="currencySelect"><option value="EUR">EUR (€)</option><option value="CAD">CAD ($)</option><option value="USD">USD ($)</option></select>
-    <select id="rangeSelect"><option value="1d">1j</option><option value="5d">5j</option><option value="1mo" selected>1m</option><option value="6mo">6m</option><option value="1y">1a</option></select>
-    <button class="btn" onclick="refreshAll()">Actualiser</button>
-    <button class="btn ghost" onclick="showOnboarding()">Tutoriel</button>
-  </div>
+.section, .chart-card {
+    background: white;
+    padding: 20px; /* Augmenté le padding pour l'aération */
+    margin: 0;
+    border-radius: var(--card-radius);
+    box-shadow: var(--shadow-soft); /* Ombre douce */
+    border: 1px solid #e5e7eb; /* Bordure légère */
+}
 
+/* Watchlist Item Styling */
+.ticker-item {
+    background: #fcfcfc;
+    padding: 12px;
+    margin: 8px 0;
+    border-radius: 8px;
+    border: 1px solid #f3f4f6;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.ticker-item:hover {
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    transform: translateY(-1px);
+}
+
+/* ------------------------------------- */
+/* --- COULEURS DES DONNÉES --- */
+/* ------------------------------------- */
+
+.ticker-item.up { border-left: 6px solid var(--accent); } 
+.ticker-item.down { border-left: 6px solid var(--danger); } 
+
+.ticker-price.up { color: var(--accent) !important; font-weight: 700; font-size: 1.1em; }
+.ticker-price.down { color: var(--danger) !important; font-weight: 700; font-size: 1.1em; }
+
+.ticker-meta {
+    font-size: 12px;
+    color: var(--text-muted);
+}
+
+.ticker-symbol {
+    font-size: 16px;
+    font-weight: 800;
+}
+
+/* Pop-up Alerte (Amélioré) */
+.popup {
+    position:fixed;
+    right:22px;
+    bottom:22px;
+    z-index:1500;
+    min-width:280px;
+    padding:14px;
+    border-radius:10px;
+    background:linear-gradient(90deg, var(--accent), #10b981);
+    color:white;
+    font-weight:700;
+    box-shadow:var(--shadow-soft);
+}
   <div class="left">
       <div class="section">          <div style="display:flex;justify-content:space-between;align-items:center">
           <div><strong>Watchlist</strong><div style="font-size:12px;color:var(--muted)">Tout est mis à jour automatiquement</div></div>
