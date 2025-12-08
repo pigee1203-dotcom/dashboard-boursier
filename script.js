@@ -107,6 +107,90 @@ async function loadChartFor(symbol){
     const highs = r.indicators.quote[0].high;
     const lows = r.indicators.quote[0].low;
     const closes = r.indicators.quote[0].close;
+async function loadFullInfoFor(symbol) {
+    try {
+        const url = `https://query1.finance.yahoo.com/v10/finance/quoteSummary/${symbol}?modules=summaryProfile,financialData,defaultKeyStatistics`;
+        const response = await fetch(url);
+        const data = await response.json();
+
+        const result = data.quoteSummary?.result?.[0];
+        if (!result) return;
+
+        // ——— Company Info
+        const profile = result.summaryProfile || {};
+        document.getElementById("companySummary").innerHTML = `
+            <h3>Résumé de l’entreprise</h3>
+            <p><strong>Secteur :</strong> ${profile.sector || "—"}</p>
+            <p><strong>Industrie :</strong> ${profile.industry || "—"}</p>
+            <p><strong>Pays :</strong> ${profile.country || "—"}</p>
+            <p><strong>Employés :</strong> ${profile.fullTimeEmployees || "—"}</p>
+            <p>${profile.longBusinessSummary || ""}</p>
+        `;
+
+        // ——— Key Metrics
+        const stats = result.defaultKeyStatistics || {};
+        const fin = result.financialData || {};
+        document.getElementById("keyMetrics").innerHTML = `
+            <h3>Chiffres clés</h3>
+            <p><strong>Market Cap :</strong> ${stats.marketCap?.fmt || "—"}</p>
+            <p><strong>PE Ratio :</strong> ${stats.forwardPE?.fmt || "—"}</p>
+            <p><strong>EPS :</strong> ${stats.epsTrailingTwelveMonths?.fmt || "—"}</p>
+            <p><strong>Prix Cible (analystes) :</strong> ${fin.targetMeanPrice?.fmt || "—"}</p>
+            <p><strong>Recommandation :</strong> ${fin.recommendationKey || "—"}</p>
+        `;
+
+        // ——— Risk Metrics
+        document.getElementById("riskMetrics").innerHTML = `
+            <h3>Indicateurs de risque</h3>
+            <p><strong>Volatilité 20 jours :</strong> calcul en cours…</p>
+            <p><strong>Variation 1 jour :</strong> ${fin.priceHint?.fmt || "—"}</p>
+            <p><strong>Cashflow :</strong> ${fin.freeCashflow?.fmt || "—"}</p>
+        `;
+
+        // ——— AI sentiment (provenant déjà de ton système)
+        document.getElementById("aiSentiment").innerHTML = `
+            <h3>Sentiment IA</h3>
+            <p><strong>Sentiment :</strong> ${(window._lastNewsSentiment * 100).toFixed(1)}%</p>
+            <p>${window._lastSentimentText || "Analyse sentimentale basée sur actualité."}</p>
+        `;
+
+        // ——— News
+        loadNewsForTicker(symbol).then(newsList => {
+            const container = document.getElementById("newsFeed");
+            container.innerHTML = `<h3>Actualité</h3>`;
+            newsList.slice(0, 5).forEach(n => {
+                container.innerHTML += `
+                    <p>
+                        <strong>${n.title}</strong><br>
+                        <a href="${n.link}" target="_blank" style="color:#16ff91">Lire</a>
+                    </p>
+                `;
+            });
+        });
+
+        // ——— Trader Guidance (auto recommendations)
+        const rsiVal = window._lastRSI || null;
+        let guidance = "";
+
+        if (rsiVal < 30) guidance = "RSI bas → possible entrée (survendu)";
+        if (rsiVal > 70) guidance = "RSI haut → prudence (suracheté)";
+        if (window._lastTrend === "up") guidance += "<br>Tendance haussière confirmée.";
+        if (window._lastSentimentText.includes("positif")) guidance += "<br>Sentiment positif dans l’actualité.";
+
+        document.getElementById("traderGuidance").innerHTML = `
+            <h3>Conseil pour débutant</h3>
+            <p>${guidance || "Analyse en cours…"}</p>
+            <ul>
+                <li>Vérifie la tendance sur le graphique</li>
+                <li>Regarde les dernières actualités</li>
+                <li>N’investis jamais plus de 1–2% du capital par trade</li>
+                <li>Utilise toujours un stop-loss</li>
+            </ul>
+        `;
+    } catch (e) {
+        console.error("Erreur loadFullInfoFor:", e);
+    }
+}
 
     // update chart
     if(state.chartType === 'line'){
