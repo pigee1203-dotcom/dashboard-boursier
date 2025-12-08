@@ -359,6 +359,250 @@ function tickerNameToCompany(t){
   const map = {AAPL:'Apple',TSLA:'Tesla',NVDA:'Nvidia',MSFT:'Microsoft',AMZN:'Amazon',GOOGL:'Google',META:'Meta'};
   return map[t] || t;
 }
+/* ------------------------------
+   O P P O R T U N I T E S  — Popup & détection
+   Colle ce block à la fin de script.js (ou juste après updateAnalysisFor)
+   ------------------------------ */
+
+// Map pour éviter popups répétés (symbol -> timestamp)
+window._lastOpportunityAt = window._lastOpportunityAt || {};
+
+// Règles et seuils (tu peux ajuster)
+const OPPORTUNITY_RULES = {
+  rsiBuyThreshold: 30,        // RSI < 30 => survendu (opportunité d'achat)
+  rsiStrongBuy: 20,           // RSI < 20 => opportunité forte
+  maCrossoverBoost: 14,       // croisement MA20 au-dessus MA50 => boost score
+  volumeSpikeMultiplier: 1.12,// prix > avg10 * 1.12 -> volume/price spike proxy
+  minScoreForPopup: 60,       // score min pour popup
+  cooldownMs: 1000 * 60 * 30  // 30 minutes cooldown par symbole
+};
+
+// Détecte opportunités pour un symbole en utilisant données déjà chargées
+// paramètres: symbol (string), closes (array of numbers), ma20, ma50, rsi (number), lastPrice (number)
+function detectOpportunitiesFor(symbol, {closes, ma20, ma50, rsi, lastPrice, avgVolume}) {
+  // score début 50 neutre, on ajoute/soustrait
+  let score = 50;
+  const details = [];
+
+  // RSI
+  if (rsi != null) {
+    if (rsi < OPPORTUNITY_RULES.rsiStrongBuy) {
+      score += 22;
+      details.push(`RSI très bas (${Math.round(rsi)}): fort signal d'achat`);
+    } else if (rsi < OPPORTUNITY_RULES.rsiBuyThreshold) {
+      score += 12;
+      details.push(`RSI bas (${Math.round(rsi)}): signal d'achat`);
+    } else if (rsi > 80) {
+      score -= 18;
+      details.push(`RSI élevé (${Math.round(rsi)}): prudence`);
+    }
+  }
+
+  // MA crossover (validé si récent crossover haussier)
+  const last = closes.length - 1;
+  const prevMA20 = ma20[last - 1], prevMA50 = ma50[last - 1];
+  const lastMA20 = ma20[last], lastMA50 = ma50[last];
+  if (prevMA20 != null && prevMA50 != null && lastMA20 != null && lastMA50 != null) {
+    if (prevMA20 < prevMA50 && lastMA20 > lastMA50) {
+      score += OPPORTUNITY_RULES.maCrossoverBoost;
+      details.push('Croisement MA20↑/MA50 (signal haussier)');
+    } else if (prevMA20 > prevMA50 && lastMA20 < lastMA50) {
+      score -= 10;
+      details.push('Croisement MA20↓/MA50 (signal baissier)');
+    }
+  }
+
+  // Volume/Price spike (naïf) — on compare lastPrice au moyenne des derniers x closes
+  const avgRecent = closes.slice(-11, -1).filter(v=>v!=null).reduce((s,n)=>s+n,0) / Math.max(1, closes.slice(-11,-1).filter(v=>v!=null).length);
+  if (avgRecent && lastPrice) {
+    if (lastPrice > avgRecent * OPPORTUNITY_RULES.volumeSpikeMultiplier) {
+      score += 8;
+      details.push('Breakout (prix > moyenne récente) — momentum');
+    }
+  }
+
+  // News sentiment global (variable globale définie par loadNewsForTicker)
+  const newsSent = window._lastNewsSentiment || 0;
+  if (newsSent > 0.3) { score += 8; details.push('News positives récentes'); }
+  else if (newsSent < -0.3) { score -= 10; details.push('News négatives récentes'); }
+
+  // normalize
+  score = Math.max(0, Math.min(100, Math.round(score)));
+
+  // Build opportunity object (if score >= threshold)
+  if (score >= OPPORTUNITY_RULES.minScoreForPopup) {
+    // Suggestions de trade (entrées/stop/takeprofit basées sur règles simples)
+    const entry = lastPrice;
+    // stop = recent low - 1% or 2% buffer (safe)
+    const recentLow = Math.min(...closes.slice(-5).filter(v=>v!=null));
+    const stop = recentLow ? Math.min(recentLow * 0.995, entry * 0.98) : entry * 0.98;
+    const tp1 = entry * 1.03; // TP1: +3%
+    const tp2 = entry * 1.07; // TP2: +7%
+    // position sizing advice (risk 1% of capital) — user must set capital manually in future
+    const advice = {
+      entry: entry,
+      stop: stop,
+      tp1, tp2,
+      positionSizing: 'Risque conseillé: 1-2% du capital par trade (utilise stop pour calcul)',
+      checklist: [
+        'Vérifier la news la plus récente',
+        'Confirmer le signal MA/RSI',
+        'Placer stop-loss avant d\'entrer',
+        'Ne risquer que 1-2% du capital sur ce trade'
+      ]
+    };
+
+    return { symbol, score, details, advice, detectedAt: Date.now() };
+  }
+
+  return null; // pas d'opportunité suffisante
+}
+
+// Affiche le popup détaillé d'opportunité (rich UI)
+function showOpportunityPopup(op) {
+  // cooldown check
+  const last = window._lastOpportunityAt[op.symbol] || 0;
+  if (Date.now() - last < OPPORTUNITY_RULES.cooldownMs) return;
+  window._lastOpportunityAt[op.symbol] = Date.now();
+
+  // construit modal
+  const modal = document.createElement('div');
+  modal.style = `
+    position:fixed; right:18px; bottom:18px; width:360px; max-width:90%;
+    background: rgba(10,12,10,0.95); color:#eaffea; border:1px solid rgba(50,255,120,0.18);
+    border-radius:12px; padding:14px; box-shadow:0 10px 30px rgba(0,0,0,0.6); z-index:99999; font-family:Inter, sans-serif;
+  `;
+
+  const title = document.createElement('div');
+  title.innerHTML = `<strong style="font-size:16px;color:#baffc9">${op.symbol}</strong> — Opportunité détectée • Score: <span style="color:#16ff91">${op.score}%</span>`;
+  modal.appendChild(title);
+
+  const detail = document.createElement('div');
+  detail.style = 'margin-top:8px; font-size:13px; color:#cfead1';
+  detail.innerHTML = `<div><em>${op.details.slice(0,3).join(' • ')}</em></div>`;
+  modal.appendChild(detail);
+
+  const adv = document.createElement('div');
+  adv.style = 'margin-top:10px; font-size:13px; color:#e8ffea';
+  adv.innerHTML = `
+    <div><strong>Entrée suggérée:</strong> ${op.advice.entry ? op.advice.entry.toFixed(2) : '--'}</div>
+    <div><strong>Stop Loss:</strong> ${op.advice.stop ? op.advice.stop.toFixed(2) : '--'}</div>
+    <div><strong>Take Profit:</strong> TP1 ${op.advice.tp1.toFixed(2)} • TP2 ${op.advice.tp2.toFixed(2)}</div>
+  `;
+  modal.appendChild(adv);
+
+  // checklist
+  const ch = document.createElement('ul');
+  ch.style = 'margin-top:10px; margin-left:18px; color:#dfffdc; font-size:13px';
+  op.advice.checklist.forEach(it=>{ const li = document.createElement('li'); li.textContent = it; ch.appendChild(li); });
+  modal.appendChild(ch);
+
+  // actions
+  const actions = document.createElement('div');
+  actions.style = 'display:flex; gap:8px; margin-top:12px;';
+
+  const btnDismiss = document.createElement('button');
+  btnDismiss.textContent = 'Fermer';
+  btnDismiss.onclick = ()=> modal.remove();
+
+  const btnAlert = document.createElement('button');
+  btnAlert.textContent = 'Créer une alerte';
+  btnAlert.style.background = '#16ff91'; btnAlert.style.color = '#001';
+  btnAlert.onclick = ()=>{
+    // ajoute alerte au state (above = entry + small buffer)
+    const price = op.advice.entry || 0;
+    const alertObj = { t: op.symbol, p: Math.round(price * 100)/100, d: 'above', triggered:false };
+    state.alerts.push(alertObj); saveState(); renderAlertsList();
+    showPopup('Alerte créée pour ' + op.symbol);
+  };
+
+  const btnView = document.createElement('button');
+  btnView.textContent = 'Voir chart';
+  btnView.onclick = ()=>{
+    modal.remove();
+    loadChartFor(op.symbol);
+    // scroll to chart (smooth)
+    const cv = document.getElementById('chart');
+    if(cv) cv.scrollIntoView({behavior:'smooth', block:'center'});
+  };
+
+  actions.appendChild(btnView);
+  actions.appendChild(btnAlert);
+  actions.appendChild(btnDismiss);
+  modal.appendChild(actions);
+
+  document.body.appendChild(modal);
+
+  // auto remove after 50s (safety)
+  setTimeout(()=>{ try{ modal.remove(); }catch(e){} }, 50000);
+}
+
+// Fonction utilitaire : exécute détection pour symbole à partir des tableaux déjà calculés (used after loadChartFor)
+function detectAndShowOpportunityFromChartData(symbol, {closes}) {
+  try{
+    const ma20 = movingAverage(closes,20);
+    const ma50 = movingAverage(closes,50);
+    const rsiArray = computeRSI(closes,14);
+    const rsi = rsiArray.slice(-1)[0] || null;
+    const lastPrice = closes.slice(-1)[0] || null;
+    const op = detectOpportunitiesFor(symbol, {closes, ma20, ma50, rsi, lastPrice});
+    if(op) showOpportunityPopup(op);
+    return op;
+  }catch(e){
+    console.warn('detectAndShowOpportunityFromChartData error', e);
+  }
+  return null;
+}
+
+// Hook: après avoir chargé un chart (intègre à ton loadChartFor)
+// Ajoute la ligne suivante à la fin de ta fonction loadChartFor (après updateAnalysisFor/ renderDetailedTable) :
+//     detectAndShowOpportunityFromChartData(symbol, {closes});
+//
+// Si tu veux que je m'en occupe directement, colle ceci juste après le block où tu crées/actualises le chart :
+(function attachAutoDetectHook(){
+  // on monkey-patch loadChartFor si elle existe (sécurisé)
+  if(typeof loadChartFor === 'function'){
+    const original = loadChartFor;
+    window.loadChartFor = async function(symbol){
+      // call original
+      await original(symbol);
+      // find closes from chart instance or re-fetch quickly (safer to re-fetch)
+      try{
+        const res = await fetch(PROXY + encodeURIComponent(API_CHART(symbol,'1mo')));
+        const j = await res.json();
+        const r = j.chart?.result?.[0];
+        const closes = r?.indicators?.quote?.[0]?.close || [];
+        detectAndShowOpportunityFromChartData(symbol, {closes});
+      }catch(e){ console.warn('hook detect error', e); }
+    };
+  }
+})();
+
+// Hook: run detection across watchlist periodically (non-intrusive)
+// Vérifie opportunités sur les tickers de la watchlist toutes les 60s (mais respecte cooldown par symbole)
+setInterval(async ()=>{
+  try{
+    for(const s of state.watchlist){
+      // passe si cooldown récent
+      const last = window._lastOpportunityAt[s] || 0;
+      if(Date.now() - last < OPPORTUNITY_RULES.cooldownMs) continue;
+      // quick fetch for recent closes
+      try{
+        const res = await fetch(PROXY + encodeURIComponent(API_CHART(s,'5d')));
+        const j = await res.json();
+        const r = j.chart?.result?.[0];
+        const closes = r?.indicators?.quote?.[0]?.close || [];
+        if(closes && closes.length > 8){
+          const op = detectAndShowOpportunityFromChartData(s, {closes});
+          // if op detected, we already popup inside
+        }
+      }catch(e){}
+    }
+  }catch(e){ console.warn('periodic detect error', e); }
+}, 60 * 1000); // 60s
+
+// End of opportunity module
+
 
 // ---- final autosave periodic ----
 setInterval(saveState, 5000);
