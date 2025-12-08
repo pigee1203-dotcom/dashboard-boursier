@@ -99,6 +99,7 @@ button:hover, .btn:hover {
     box-shadow: var(--shadow-soft); /* Ombre douce */
     border: 1px solid #e5e7eb; /* Bordure légère */
 }
+</style>
 
 /* Watchlist Item Styling */
 .ticker-item {
@@ -140,19 +141,25 @@ button:hover, .btn:hover {
 
 /* Pop-up Alerte (Amélioré) */
 .popup {
-    position:fixed;
-    right:22px;
-    bottom:22px;
-    z-index:1500;
-    min-width:280px;
-    padding:14px;
-    border-radius:10px;
-    background:linear-gradient(90deg, var(--accent), #10b981);
-    color:white;
-    font-weight:700;
-    box-shadow:var(--shadow-soft);
+    position:fixed;
+    right:22px;
+    bottom:22px;
+    z-index:1500;
+    min-width:280px;
+    padding:14px;
+    border-radius:10px;
+    background:linear-gradient(90deg, var(--accent), #10b981);
+    color:white;
+    font-weight:700;
+    box-shadow:var(--shadow-soft);
 }
-  <div class="left">
+</style>
+</head>
+
+<body>
+<div class="container">
+<div class="grid">
+<div class="left">
       <div class="section">          <div style="display:flex;justify-content:space-between;align-items:center">
           <div><strong>Watchlist</strong><div style="font-size:12px;color:var(--muted)">Tout est mis à jour automatiquement</div></div>
           <div style="display:flex;gap:8px;align-items:center">
@@ -162,7 +169,7 @@ button:hover, .btn:hover {
         </div>
         <div class="watchlist-list" id="watchlistList"></div>
       </div>
-      <div class="panel" style="margin-top:12px">
+      <div class="section" style="margin-top:12px">
         <strong>Alertes & Paper-trade</strong>
         <div style="display:flex;gap:8px;margin-top:10px">
           <input id="alertTicker" placeholder="Ticker" class="small-input" style="width:90px">
