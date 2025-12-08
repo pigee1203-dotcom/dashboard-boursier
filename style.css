@@ -1,4 +1,4 @@
-/* ====== GLOBAL ====== */
+/* ----------- RESET & BASE ----------- */
 * {
     margin: 0;
     padding: 0;
@@ -7,196 +7,131 @@
 }
 
 body {
-    background: linear-gradient(135deg, #0b0f13, #111820, #0d131a);
-    color: #fff;
-    height: 100vh;
-    overflow: hidden;
+    background: #0b0b0d;
+    color: #e6ffe6;
+    padding: 20px;
 }
 
-/* ===== HEADER ===== */
-.glass-header {
-    width: 100%;
-    height: 68px;
-    backdrop-filter: blur(12px);
+/* ----------- TITRES ----------- */
+h1, h2, h3 {
+    color: #81ff81;
+    text-shadow: 0 0 8px rgba(0, 255, 120, 0.5);
+    margin-bottom: 10px;
+}
+
+/* ----------- CARDS (GLASS EFFECT) ----------- */
+.card {
     background: rgba(255, 255, 255, 0.05);
-    border-bottom: 1px solid rgba(255,255,255,0.15);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 20px;
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.10);
+    box-shadow: 0 0 18px rgba(0, 255, 100, 0.08);
+    transition: 0.25s ease;
+}
+
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0 30px rgba(0, 255, 100, 0.18);
+}
+
+/* ----------- BUTTONS ----------- */
+button {
+    padding: 10px 16px;
+    background: #0f2510;
+    border: 1px solid #32ff32;
+    border-radius: 8px;
+    color: #aaffaa;
+    cursor: pointer;
+    transition: 0.2s ease;
+    font-weight: bold;
+}
+
+button:hover {
+    background: #32ff3280;
+    color: black;
+    box-shadow: 0 0 12px #32ff32;
+}
+
+/* ----------- INPUTS ----------- */
+input, select {
+    padding: 10px;
+    border-radius: 8px;
+    border: 1px solid #32ff32;
+    background: rgba(255, 255, 255, 0.05);
+    color: #aaffaa;
+    outline: none;
+}
+
+input::placeholder {
+    color: #66aa66;
+}
+
+/* ----------- WATCHLIST ----------- */
+.ticker-item {
+    padding: 12px;
+    background: rgba(0, 255, 50, 0.05);
+    border: 1px solid rgba(0, 255, 50, 0.15);
+    border-radius: 12px;
+    margin-bottom: 8px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 0 25px;
-    position: sticky;
-    top: 0;
 }
 
-.logo {
-    font-size: 26px;
-    font-weight: 700;
-    color: #16ff91;
-    text-shadow: 0 0 10px #16ff91aa;
-}
+/* COLORS UP/DOWN */
+.price-up { color: #4eff4e; font-weight: bold; }
+.price-down { color: #ff4e4e; font-weight: bold; }
 
-.controls select {
-    padding: 6px 12px;
-    border-radius: 8px;
-    background: #0f161d;
-    border: 1px solid #16ff91;
-    color: #16ff91;
-}
-
-/* ===== LAYOUT ===== */
-.layout {
-    display: grid;
-    grid-template-columns: 260px 1fr 340px;
-    height: calc(100vh - 68px);
-}
-
-/* ===== PANELS ===== */
-.glass-panel {
+/* ----------- GRAPH AREA ----------- */
+#chart-container {
     padding: 20px;
-    overflow-y: auto;
-    backdrop-filter: blur(14px);
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.12);
-    margin: 6px;
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(10px);
     border-radius: 16px;
-    box-shadow: 0 0 20px #00000060;
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 0 25px rgba(0,255,120,0.10);
 }
 
-/* SCROLLBAR */
-.glass-panel::-webkit-scrollbar {
-    width: 6px;
-}
-.glass-panel::-webkit-scrollbar-thumb {
-    background: #16ff91;
-    border-radius: 10px;
-}
-
-/* ===== LEFT PANEL: WATCHLIST ===== */
-.watchlist {
-    margin-top: 15px;
-}
-
-.add-ticker {
-    display: flex;
-    gap: 6px;
-    margin-bottom: 15px;
-}
-
-.add-ticker input {
-    flex: 1;
-    padding: 8px;
-    border-radius: 8px;
-    border: 1px solid #16ff91;
-    background: #0f161d;
-    color: #16ff91;
-}
-
-.add-ticker button {
-    width: 38px;
-    background: #16ff91;
-    color: #000;
-    border: none;
-    border-radius: 6px;
-    font-size: 20px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: 0.2s;
-}
-
-.add-ticker button:hover {
-    background: #0bffc6;
-}
-
-.watch-item {
-    padding: 10px 12px;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.18);
-    margin-bottom: 10px;
-    border-radius: 10px;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-.watch-item:hover {
-    background: rgba(22,255,145,0.12);
-    border-color: #16ff91;
-}
-
-/* ===== CENTER PANEL ===== */
-
-#current-title {
-    font-size: 22px;
-    margin-bottom: 10px;
-}
-
-#chart {
-    background: #0f161c;
-    border-radius: 14px;
-    padding: 10px;
-    margin-bottom: 15px;
-}
-
-#toggle-chart {
-    width: 100%;
-    padding: 12px;
-    margin-bottom: 15px;
-    border-radius: 10px;
-    background: rgba(22,255,145,0.15);
-    border: 1px solid #16ff91;
-    color: #16ff91;
-    cursor: pointer;
-    transition: 0.2s;
-}
-
-#toggle-chart:hover {
-    background: rgba(22,255,145,0.3);
-}
-
-/* INFO GRID */
-.info-grid {
-    display: grid;
-    grid-template-columns: repeat(2,1fr);
-    gap: 15px;
-}
-
-.box {
-    padding: 14px;
-    background: rgba(255,255,255,0.06);
-    border-radius: 12px;
-    border: 1px solid rgba(255,255,255,0.14);
-    transition: 0.2s;
-}
-
-.box:hover {
-    background: rgba(22,255,145,0.12);
-    border-color: #16ff91;
-    transform: translateY(-2px);
-}
-
-/* ===== RIGHT PANEL ===== */
-
-#news {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
+/* ----------- NEWS ----------- */
 .news-item {
-    background: rgba(255,255,255,0.06);
     padding: 10px;
-    border-radius: 10px;
-    border: 1px solid rgba(255,255,255,0.2);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    opacity: 0.85;
 }
 
 .news-item:hover {
-    background: rgba(22,255,145,0.12);
-    border-color: #16ff91;
+    background: rgba(255,255,255,0.05);
+    opacity: 1;
 }
 
-#ai-tips {
-    margin-top: 12px;
-    background: rgba(255,255,255,0.06);
-    padding: 12px;
-    border-radius: 10px;
-    border: 1px solid rgba(255,255,255,0.14);
+/* ----------- ALERT BADGE ----------- */
+.alert-badge {
+    display: inline-block;
+    padding: 4px 8px;
+    color: black;
+    background: #32ff32;
+    font-size: 12px;
+    border-radius: 8px;
+    margin-left: 8px;
+}
+
+/* ----------- MODE DÉBUTANT ----------- */
+.helper-box {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    padding: 15px;
+    border-radius: 14px;
+    margin-bottom: 15px;
+}
+
+/* ----------- FADE ANIMATION ----------- */
+.fade-in {
+    animation: fadeIn 0.5s ease forwards;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
