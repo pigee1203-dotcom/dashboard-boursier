@@ -3,15 +3,12 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Dashboard Boursier — Desktop Glass Pro</title>
+<title>Dashboard Boursier — Final</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial@3.0.0/dist/chartjs-chart-financial.min.js"></script>
 
 <style>
-/* ====================
-   CSS: MISE EN PAGE ET STYLES
-   ==================== */
 :root {
     /* Palette de Couleurs "Glass Pro" */
     --primary: #2c776e;      /* Vert-bleu foncé (professionnel) */
@@ -21,7 +18,7 @@
     --shadow-soft: 0 4px 12px rgba(0,0,0,0.08); /* Ombre douce */
     --text-muted: #6b7280;   /* Gris pour les textes secondaires */
     --card-radius: 12px;
-    font-family: 'Roboto', Arial, sans-serif; /* Police claire et lisible */
+    font-family: 'Roboto', Arial, sans-serif;
 }
 
 body {
@@ -30,17 +27,38 @@ body {
     background: linear-gradient(180deg, var(--bg-light), #e6f0f2); /* Dégradé doux */
     margin: 0;
     padding: 20px;
-    color: #1f2937; /* Texte très foncé */
+    color: #1f2937; 
 }
 .container{
     max-width: 1400px;
     margin: 0 auto;
 }
 
-/* ------------------------------------- */
-/* --- BOUTONS / INPUTS --- */
-/* ------------------------------------- */
+/* GRILLE DE BASE (ESSENTIEL POUR LES 2 COLONNES) */
+.grid {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 24px;
+    margin-top: 24px;
+    align-items: start;
+}
+@media (max-width:1100px){
+    .grid{ grid-template-columns:1fr; }
+}
+.left{ order:1; } 
+.right{ order:2; }
 
+/* PANNEAUX / SECTIONS (BOÎTES BLANCHES) */
+.section, .chart-card, .panel {
+    background: white;
+    padding: 20px;
+    margin: 0;
+    border-radius: var(--card-radius);
+    box-shadow: var(--shadow-soft); /* Ombre douce */
+    border: 1px solid #e5e7eb; 
+}
+
+/* BOUTONS ET INPUTS */
 button, .btn {
     padding: 8px 12px;
     margin-left: 5px;
@@ -51,21 +69,11 @@ button, .btn {
     transition: all 0.2s;
     font-weight: 600;
 }
-button:hover, .btn:hover {
-    background-color: #e0e0e0;
-    border-color: #9ca3af;
-}
-
-/* Boutons d'action principale */
 .btn.primary {
     background: var(--primary);
     color: white;
     border: none;
 }
-.btn.primary:hover {
-    background: #1e5a51;
-}
-
 .controls input, .controls select, .small-input {
     padding: 8px 10px;
     border-radius: 6px;
@@ -73,36 +81,7 @@ button:hover, .btn:hover {
     background-color: white;
 }
 
-/* ------------------------------------- */
-/* --- MISE EN PAGE / SECTIONS --- */
-/* ------------------------------------- */
-
-.grid {
-    display: grid;
-    grid-template-columns: 360px 1fr;
-    gap: 24px; /* Augmenté l'espacement pour l'aération */
-    margin-top: 24px;
-    align-items: start;
-}
-@media (max-width:1100px){
-    .grid{ grid-template-columns:1fr; }
-}
-.left{ order:1; } 
-.right{ order:2; }
-
-.section, .chart-card, .panel {
-    background: white;
-    padding: 20px; /* Augmenté le padding pour l'aération */
-    margin: 0;
-    border-radius: var(--card-radius);
-    box-shadow: var(--shadow-soft); /* Ombre douce */
-    border: 1px solid #e5e7eb; /* Bordure légère */
-}
-
-/* ------------------------------------- */
-/* --- WATCHLIST STYLING --- */
-/* ------------------------------------- */
-
+/* WATCHLIST ITEM STYLING */
 .ticker-item {
     background: #fcfcfc;
     padding: 12px;
@@ -115,12 +94,7 @@ button:hover, .btn:hover {
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s;
 }
-.ticker-item:hover {
-    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-    transform: translateY(-1px);
-}
-
-/* COULEURS DES DONNÉES */
+/* COULEURS EN HAUSSE/BAISSE */
 .ticker-item.up { border-left: 6px solid var(--accent); } 
 .ticker-item.down { border-left: 6px solid var(--danger); } 
 .ticker-price.up { color: #05603a !important; font-weight: 700; font-size: 1.1em; } 
@@ -132,21 +106,6 @@ button:hover, .btn:hover {
 .ticker-symbol {
     font-size: 16px;
     font-weight: 800;
-}
-
-/* Pop-up Alerte (Amélioré) */
-.popup {
-    position:fixed;
-    right:22px;
-    bottom:22px;
-    z-index:1500;
-    min-width:280px;
-    padding:14px;
-    border-radius:10px;
-    background:linear-gradient(90deg, var(--accent), #10b981);
-    color:white;
-    font-weight:700;
-    box-shadow:var(--shadow-soft);
 }
 </style>
 </head>
@@ -288,9 +247,6 @@ button:hover, .btn:hover {
 </div>
 
 <script>
-/* ====================
-   JAVASCRIPT: LOGIQUE DU DASHBOARD
-   ==================== */
 const PROXY = 'https://api.allorigins.win/raw?url=';
 const API_QUOTE = s => `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${encodeURIComponent(s)}`;
 const API_CHART = (s, range='1mo') => `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(s)}?range=${range}&interval=1d`;
@@ -336,9 +292,9 @@ async function renderWatchlist(){
     left.append(sym, priceSpan, meta);
 
     const right = el('div',{style:'display:flex;flex-direction:column;align-items:flex-end;gap:6px'});
-    const seeBtn = el('button',{cls:'btn ghost'},'Voir'); seeBtn.onclick = ()=> loadChartFor(symbol);
-    const addAlertBtn = el('button',{cls:'btn ghost'},'Alerte'); addAlertBtn.onclick = ()=> { document.getElementById('alertTicker').value=symbol; };
-    const delBtn = el('button',{cls:'btn ghost', style:'color:var(--danger)'}, 'Suppr'); delBtn.onclick = () => {
+    const seeBtn = el('button',{cls:'btn'},'Voir'); seeBtn.onclick = ()=> loadChartFor(symbol);
+    const addAlertBtn = el('button',{cls:'btn'},'Alerte'); addAlertBtn.onclick = ()=> { document.getElementById('alertTicker').value=symbol; };
+    const delBtn = el('button',{cls:'btn', style:'color:var(--danger)'}, 'Suppr'); delBtn.onclick = () => {
       state.watchlist = state.watchlist.filter(t => t !== symbol);
       storeState();
       refreshAll();
@@ -371,7 +327,7 @@ function renderTableList(){
     row.innerHTML = `<div style="width:100px"><strong>${symbol}</strong></div>
       <div><span id="row-price-${symbol}">--</span></div>
       <div><span id="row-change-${symbol}">--</span></div>
-      <div><button class="btn ghost" onclick="loadChartFor('${symbol}')">Voir</button></div>`;
+      <div><button class="btn" onclick="loadChartFor('${symbol}')">Voir</button></div>`;
     table.appendChild(row);
   });
 }
@@ -381,7 +337,7 @@ function renderAlertsUI(){
   const elist=document.getElementById('alertsList'); elist.innerHTML=''; 
   state.alerts.forEach((a,i)=>{ 
     const node=el('div',{cls:'ticker-item', style:'padding:8px;margin:4px 0;', html:`<div><strong>${a.ticker}</strong> ${a.direction==='above'?'📈 >':'📉 <'} ${formatCurrency(a.price)}</div>`}); 
-    const d=el('button',{cls:'btn ghost', style:'padding:4px 8px;'},'Suppr'); 
+    const d=el('button',{cls:'btn', style:'padding:4px 8px;'},'Suppr'); 
     d.onclick=()=>{ state.alerts.splice(i,1); storeState(); renderAlertsUI(); }; 
     node.style.justifyContent='space-between';
     node.appendChild(d); 
@@ -393,7 +349,7 @@ function renderPaperTrades(){
   const out=document.getElementById('paperTradesList'); out.innerHTML=''; 
   state.paperTrades.forEach((t,i)=>{ 
     const div=el('div',{cls:'ticker-item', style:'padding:8px;margin:4px 0;', html:`<div><strong>${t.ticker}</strong> • ${t.qty} @ ${formatCurrency(t.price)}</div>`}); 
-    const del=el('button',{cls:'btn ghost', style:'padding:4px 8px;'},'Vendu'); 
+    const del=el('button',{cls:'btn', style:'padding:4px 8px;'},'Vendu'); 
     del.onclick=()=>{ 
       if(confirm(`Voulez-vous clôturer ${t.ticker}?`)){
         state.paperTrades.splice(i,1); storeState(); renderPaperTrades(); 
@@ -688,10 +644,20 @@ function downloadCSV(){
 
 /* REFRESH / LIVE / STORAGE / UTILS */
 function storeState(){ localStorage.setItem('watchlist', JSON.stringify(state.watchlist)); localStorage.setItem('alerts', JSON.stringify(state.alerts)); localStorage.setItem('paperTrades', JSON.stringify(state.paperTrades)); }
-function addTickerFromInput(){ const v=document.getElementById('addTickerInput').value.trim().toUpperCase(); if(!v) return; if(!state.watchlist.includes(v)) state.watchlist.push(v); document.getElementById('addTickerInput').value=''; storeState(); renderWatchlist(); renderTableList(); updateScannerAndHeatmap(); }
-function showPopup(text){ const p = el('div',{cls:'popup'}, text); document.getElementById('popupContainer').appendChild(p); setTimeout(()=>p.remove(),4200); }
-function showOnboarding(){ document.getElementById('onboarding').style.display='flex'; }
-function closeOnboarding(){ document.getElementById('onboarding').style.display='none'; }
+function addTickerFromInput(){ const v=document.getElementById('addTickerInput').value.trim().toUpperCase(); if(!v) return; if(!state.watchlist.includes(v)) state.watchlist.push(v); document.getElementById('addTickerInput').value=''; storeState(); refreshAll(); }
+function showPopup(text){ 
+  const p = el('div',{cls:'popup', style:'position:fixed;right:22px;bottom:22px;z-index:1500;min-width:280px;padding:14px;border-radius:10px;background:linear-gradient(90deg,#4CAF50, #10b981);color:white;font-weight:700;box-shadow:0 4px 12px rgba(0,0,0,0.08);'}, text); 
+  document.getElementById('popupContainer').appendChild(p); 
+  setTimeout(()=>p.remove(),4200); 
+}
+function showOnboarding(){ 
+  const onboardingEl = document.getElementById('onboarding');
+  if(onboardingEl) onboardingEl.style.display='flex'; 
+}
+function closeOnboarding(){ 
+  const onboardingEl = document.getElementById('onboarding');
+  if(onboardingEl) onboardingEl.style.display='none'; 
+}
 
 async function refreshAll(){
   for(const t of state.watchlist){
