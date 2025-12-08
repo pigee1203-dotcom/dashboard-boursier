@@ -2,178 +2,86 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Trader Dashboard</title>
-
-    <style>
-        /* ----- Général ----- */
-        body {
-            margin: 0;
-            padding: 0;
-            background: linear-gradient(to bottom right, #0c1624, #1b2b38);
-            font-family: "Segoe UI", Roboto, sans-serif;
-            color: #e9f5ee;
-        }
-
-        h2 {
-            margin: 0 0 10px;
-            font-weight: 600;
-        }
-
-        /* ----- Glassmorphism ----- */
-        .glass {
-            background: rgba(255,255,255,0.08);
-            border-radius: 18px;
-            border: 1px solid rgba(255,255,255,0.15);
-            backdrop-filter: blur(20px) saturate(180%);
-            padding: 20px;
-            box-shadow: 0 0 25px rgba(0,255,180,0.12);
-        }
-
-        /* ----- Grille Dashboard ----- */
-        .container {
-            display: grid;
-            grid-template-columns: 260px 1fr 320px;
-            grid-template-rows: auto auto 1fr;
-            gap: 20px;
-            padding: 25px;
-        }
-
-        /* ----- Boites ----- */
-        .box {
-            animation: fade 0.6s ease-in-out;
-        }
-
-        @keyframes fade {
-            from {opacity: 0; transform: translateY(10px);}
-            to {opacity: 1; transform: translateY(0);}
-        }
-
-        /* ----- Listes ----- */
-        ul {padding-left: 20px;}
-        li {margin: 4px 0;}
-
-        /* ----- Bouton ----- */
-        button {
-            margin-top: 10px;
-            background: rgba(0,255,180,0.12);
-            border: 1px solid rgba(0,255,160,0.25);
-            padding: 8px 12px;
-            border-radius: 8px;
-            color: #aefbe0;
-            cursor: pointer;
-        }
-        button:hover {
-            background: rgba(0,255,180,0.25);
-        }
-
-        /* ----- Input ----- */
-        input {
-            width: 100%;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid rgba(255,255,255,0.25);
-            background: rgba(255,255,255,0.08);
-            color: #dffdf3;
-        }
-
-        /* ----- Résultats ----- */
-        .result {
-            margin-top: 12px;
-            font-size: 14px;
-            line-height: 1.4;
-        }
-
-    </style>
+    <title>TraderGlass – Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luxon"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-luxon"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-financial"></script>
 </head>
 
 <body>
 
-    <div class="container">
+    <!-- HEADER -->
+    <header class="glass-header">
+        <div class="logo">TraderGlass</div>
 
-        <!-- ▌ COLONNE GAUCHE — INFOS & WATCHLIST -->
-        <div class="glass box" style="grid-row: span 3;">
-            <h2>📊 Marchés en temps réel</h2>
-            <div id="realtime"></div>
-
-            <hr style="border-color: rgba(255,255,255,0.1); margin: 20px 0;">
-
-            <h2>⭐ Watchlist</h2>
-            <ul id="watchlist">
-                <li>AAPL – Apple</li>
-                <li>TSLA – Tesla</li>
-                <li>NFLX – Netflix</li>
-                <li>NVDA – Nvidia</li>
-            </ul>
+        <div class="controls">
+            <select id="currency-selector">
+                <option value="CAD">CAD $</option>
+                <option value="USD">USD $</option>
+                <option value="EUR">EUR €</option>
+            </select>
         </div>
+    </header>
 
-        <!-- ▌ COLONNE CENTRALE — RECHERCHE & ANALYSE -->
-        <div class="glass box" style="grid-column: 2; grid-row: 1;">
-            <h2>🔍 Recherche une action</h2>
-            <input id="symbolInput" placeholder="Ex: AAPL, TSLA, AMZN"/>
-            <button onclick="analyseAction()">Analyser</button>
-            <div id="analyseResult" class="result"></div>
-        </div>
+    <!-- LAYOUT -->
+    <div class="layout">
 
-        <!-- ▌ COLONNE CENTRALE — CONSEILS TRADING -->
-        <div class="glass box" style="grid-column: 2; grid-row: 2;">
-            <h2>🧠 Conseils & Aide pour Débutants</h2>
-            <ul>
-                <li>Ne jamais investir plus que ce que tu peux perdre.</li>
-                <li>Commence par 2-3 actions maximum.</li>
-                <li>Observe les tendances sur 3 jours avant d’entrer.</li>
-                <li>Place toujours un Stop-Loss.</li>
-                <li>Ne trade pas sous émotions.</li>
-            </ul>
-        </div>
+        <!-- LEFT PANEL — WATCHLIST -->
+        <aside class="glass-panel left">
+            <h2>Watchlist</h2>
 
-        <!-- ▌ COLONNE CENTRALE — NEWS -->
-        <div class="glass box" style="grid-column: 2; grid-row: 3;">
-            <h2>📰 Actualité Financière</h2>
+            <div class="add-ticker">
+                <input type="text" id="new-ticker" placeholder="Ajouter un ticker...">
+                <button id="add-ticker-btn">+</button>
+            </div>
+
+            <div id="watchlist" class="watchlist"></div>
+        </aside>
+
+        <!-- CENTER PANEL — GRAPH & DATA -->
+        <main class="glass-panel center">
+            
+            <h2 id="current-title">Sélectionne une action</h2>
+
+            <canvas id="chart" height="260"></canvas>
+
+            <button id="toggle-chart">Changer type (Line / Candles)</button>
+
+            <div class="info-grid">
+                <div class="box">
+                    <h3>Prix actuel</h3>
+                    <p id="price">--</p>
+                </div>
+
+                <div class="box">
+                    <h3>RSI</h3>
+                    <p id="rsi">--</p>
+                </div>
+
+                <div class="box">
+                    <h3>Tendance</h3>
+                    <p id="trend">--</p>
+                </div>
+
+                <div class="box">
+                    <h3>Risque</h3>
+                    <p id="risk">--</p>
+                </div>
+            </div>
+        </main>
+
+        <!-- RIGHT PANEL — NEWS / CONSEILS -->
+        <aside class="glass-panel right">
+            <h2>Actualité</h2>
             <div id="news"></div>
-        </div>
 
-        <!-- ▌ COLONNE DROITE — ALERTES -->
-        <div class="glass box" style="grid-column: 3; grid-row: span 3;">
-            <h2>⏰ Alertes</h2>
-            <ul id="alerts">
-                <li>AAPL approche résistance 195$</li>
-                <li>BTC volatil > 3% dernière heure</li>
-                <li>TSLA tendance haussière 2 jours</li>
-            </ul>
-        </div>
-
+            <h2>Conseils AI</h2>
+            <p id="ai-tips">Sélectionne une action...</p>
+        </aside>
     </div>
 
-    <!-- ▌ SCRIPT -->
-    <script>
-        // ---- Analyse d'une action ----
-        async function analyseAction() {
-            const symbol = document.getElementById("symbolInput").value;
-            if (!symbol) return;
-
-            const res = await fetch(`http://localhost:3000/analyse/${symbol}`);
-            const data = await res.json();
-
-            document.getElementById("analyseResult").innerHTML = `
-                <b>Symbole :</b> ${data.symbol} <br>
-                <b>Tendance :</b> ${data.recommandation} <br>
-                <b>Confiance :</b> ${data.confiance}
-            `;
-        }
-
-        // ---- News ----
-        async function loadNews() {
-            const res = await fetch("http://localhost:3000/news");
-            const data = await res.json();
-
-            document.getElementById("news").innerHTML = data.news
-                .map(n => `• ${n.Description || n.API}` )
-                .join("<br>");
-        }
-
-        loadNews();
-    </script>
-
+    <script src="script.js"></script>
 </body>
 </html>
